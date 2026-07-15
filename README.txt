@@ -1,63 +1,36 @@
-READYSETPREP — GITHUB FLAT-UPLOAD VERSION
+READYSETPREP — ISEE PRACTICE, ALL LEVELS
+Host-ready static website based on the original Primary 2 interface.
 
-This package contains NO folders. Every file belongs in the root of the
-GitHub repository, so you can upload all files together in the GitHub website.
+FILES
+- index.html   complete website and Primary 2 test
+- privacy.html privacy notice
 
-FILES TO UPLOAD
-- index.html
-- styles.css
-- app.js
-- catalog.js
-- manifest.js
-- primary2-test2.js
-- test-template.js
-- privacy.html
+WHAT CHANGED
+- Preserved the original three-option home navigation:
+  Timed Full Test, Untimed Full Test, and Untimed by Section.
+- Added selectable level cards for Primary 2, Primary 3, Primary 4,
+  Lower, Middle, and Upper.
+- Primary 2 includes the complete interactive test.
+- The other levels show their section/timing blueprint and are ready
+  for question banks to be added later.
+- Added restrained color accents to the main page.
+- Added a Home button throughout the active test, review, intro,
+  and result screens.
+- Kept audio replay, visible auditory passage, timer, saved progress,
+  answer review, and estimated practice stanine.
 
-UPLOAD USING GITHUB.COM
-1. Download and unzip ReadySetPrep_GitHub_Flat_Upload.zip.
-2. Open the unzipped folder on your computer.
-3. Open your GitHub repository in Chrome.
-4. Select Add file > Upload files.
-5. Select all eight website files at once, or drag all eight files into the
-   GitHub upload page.
-6. Enter a commit message such as "Upload ReadySetPrep website".
-7. Select Commit changes.
+DEPLOYMENT
+Upload index.html and privacy.html together to GitHub Pages, Netlify,
+or Vercel. The site requires no build step and no database.
 
-Do not upload the ZIP itself. GitHub Pages needs the extracted index.html and
-the other files.
+CURRENT DATA MODEL
+- Many students may use the same public URL.
+- Each browser/device stores its own Primary 2 progress locally.
+- There is no account system or central score database.
+- Use initials, a nickname, or a teacher-assigned code rather than a
+  child's full legal name.
 
-ENABLE GITHUB PAGES
-1. In the repository, open Settings.
-2. Select Pages.
-3. Under Build and deployment, choose Deploy from a branch.
-4. Select branch main and folder / (root).
-5. Select Save.
-
-ADDING A NEW TEST
-1. Duplicate test-template.js locally.
-2. Rename it, for example primary3-test1.js.
-3. Add the question content.
-4. Add the filename to manifest.js, for example:
-
-window.READYSETPREP_TEST_FILES = [
-  'primary2-test2.js',
-  'primary3-test1.js'
-];
-
-5. Upload only the new test file and the updated manifest.js to GitHub.
-
-COMPLETED TEST LOG
-Completed tests are logged in the browser being used. The log is not shared
-between different devices or students yet.
-
-
-PRIMARY 2 PRACTICE TEST #3
-- Added primary2-test3.js.
-- Uses the same structure as Practice Test #2:
-  6 Auditory Comprehension questions,
-  18 Reading questions across three passages,
-  and 24 Mathematics questions.
-- The test includes original passages, visuals, answers, explanations,
-  timers, answer elimination, review, scoring, practice stanine,
-  and completed-test logging.
-- manifest.js now loads both Primary 2 tests.
+ADDING MORE TEST CONTENT
+The level selector and informational blueprints are already present.
+New question banks will require adding the corresponding test data and
+section logic for that level.
