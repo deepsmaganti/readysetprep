@@ -1,55 +1,51 @@
-READYSETPREP — MODULAR MULTI-TEST WEBSITE
+READYSETPREP — GITHUB FLAT-UPLOAD VERSION
 
-This version keeps the current ReadySetPrep design but separates the website engine from the test content. You can add many tests without editing the main application.
+This package contains NO folders. Every file belongs in the root of the
+GitHub repository, so you can upload all files together in the GitHub website.
 
-FOLDER STRUCTURE
-- index.html                 small app shell
-- styles.css                all styling
-- js/catalog.js             test registry and level definitions
-- js/app.js                 navigation, timer, audio, scoring, results
-- tests/manifest.js          list of test files that should be loaded
-- tests/primary2-test2.js    the current complete Primary 2 test
-- tests/test-template.js     copy this to create a new test
-- privacy.html              privacy notice
+FILES TO UPLOAD
+- index.html
+- styles.css
+- app.js
+- catalog.js
+- manifest.js
+- primary2-test2.js
+- test-template.js
+- privacy.html
 
-ADD A NEW TEST
-1. Duplicate tests/test-template.js.
-2. Rename it, for example tests/primary3-test1.js.
-3. Fill in the test metadata, sections, passages, questions, answers, and explanations.
-4. Add its path to tests/manifest.js:
+UPLOAD USING GITHUB.COM
+1. Download and unzip ReadySetPrep_GitHub_Flat_Upload.zip.
+2. Open the unzipped folder on your computer.
+3. Open your GitHub repository in Chrome.
+4. Select Add file > Upload files.
+5. Select all eight website files at once, or drag all eight files into the
+   GitHub upload page.
+6. Enter a commit message such as "Upload ReadySetPrep website".
+7. Select Commit changes.
 
-   window.READYSETPREP_TEST_FILES = [
-     'tests/primary2-test2.js',
-     'tests/primary3-test1.js'
-   ];
+Do not upload the ZIP itself. GitHub Pages needs the extracted index.html and
+the other files.
 
-5. Upload the new/changed files. The test automatically appears under its level in the Practice test dropdown.
+ENABLE GITHUB PAGES
+1. In the repository, open Settings.
+2. Select Pages.
+3. Under Build and deployment, choose Deploy from a branch.
+4. Select branch main and folder / (root).
+5. Select Save.
 
-IMPORTANT IDS
-- Every test.id must be unique across the website.
-- Every section.id must be unique within its test.
-- Question num values must be unique within each section.
+ADDING A NEW TEST
+1. Duplicate test-template.js locally.
+2. Rename it, for example primary3-test1.js.
+3. Add the question content.
+4. Add the filename to manifest.js, for example:
 
-SUPPORTED SECTION TYPES
-- auditory: a visible/replayable passage and questions
-- reading: one or more passages, each with questions
-- questions: standalone questions for math, verbal, quantitative, etc.
-- essay: an unscored writing prompt
+window.READYSETPREP_TEST_FILES = [
+  'primary2-test2.js',
+  'primary3-test1.js'
+];
 
-STUDENT DATA
-Each test saves independently in the browser using its unique test id. Adding a new test will not overwrite progress from another test.
+5. Upload only the new test file and the updated manifest.js to GitHub.
 
-DEPLOYMENT
-Upload the entire folder structure to GitHub Pages, Netlify, or Vercel. Do not flatten the folders because index.html expects js/ and tests/ paths.
-
-
-COMPLETED-TEST LOG
-- Every completed full test and completed section-practice attempt is logged.
-- The home page shows student, ISEE level, test, mode, completion date,
-  overall score, practice stanine (for full tests), and section details.
-- The log combines attempts from every published test and every level.
-- Results can be exported as a CSV file.
-- The log is stored in localStorage, so it is shared only by users of the
-  same browser profile on the same device.
-- A central all-student log requires a database/back-end and is not part
-  of this static version.
+COMPLETED TEST LOG
+Completed tests are logged in the browser being used. The log is not shared
+between different devices or students yet.
