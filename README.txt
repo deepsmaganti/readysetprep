@@ -59,3 +59,25 @@ ANSWER ELIMINATION UPDATE
 - Selecting × again restores the choice.
 - Selecting an eliminated choice restores it and records the answer.
 - Eliminations are saved separately for Practice Test #1 and Practice Test #2.
+
+
+PRIMARY 2 PRACTICE TESTS #3 AND #4
+- Added two new complete, original Primary 2 practice tests.
+- Each test contains:
+  - 6 Auditory Comprehension questions (7 minutes)
+  - 18 Reading questions across three passages (20 minutes)
+  - 24 Mathematics questions (26 minutes)
+- The new tests use the same broad concepts and question-type balance as
+  the provided Primary 2 reference materials, while using new passages,
+  scenarios, numbers, visuals, answer choices, and explanations.
+- The website now offers Practice Tests #1, #2, #3, and #4.
+- Every test has separate saved progress, timer, flags, eliminations,
+  answers, review, and scoring.
+
+
+PRIMARY 2 PRACTICE TESTS #5 AND #6
+- Added two more complete Primary 2 / applying-to-Grade-2 practice tests.
+- Each test contains 6 Auditory Comprehension, 18 Reading, and 24 Mathematics questions.
+- The concepts and question-type balance match the broad Primary 2 patterns in the reference materials.
+- All new passages, scenarios, numbers, visuals, answer choices, and explanations are original.
+- The site now contains six full Primary 2 practice tests.
