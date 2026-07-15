@@ -23,24 +23,45 @@ LEVEL_IDS.forEach(lid=>{
 /* ---------------- Scoring helpers ---------------- */
 function pctOf(correct, total){ return total ? Math.round((correct/total)*100) : 0; }
 /* NOTE: This is a PRACTICE ESTIMATE, not an official ERB stanine. Real ISEE
-   stanines compare a student's raw score to a national pool of applicants
-   in the same grade — data this site has no access to. This function maps
-   percent-correct onto the standard stanine percentile bands (4/11/23/40/
-   60/77/89/96) purely as a rough, consistent way to track practice trends
-   over time. Always labeled "practice stanine estimate" in the UI. */
+   stanines are norm-referenced by grade and calculated from scaled scores
+   using ERB's national test-taking population — data this site has no
+   access to. This function maps raw percent-correct on this practice
+   workbook onto a transparent 9-band scale (shown to the user in full in
+   the results screen) purely to track practice trends over time. Always
+   labeled "practice stanine estimate" in the UI, and only shown after a
+   FULL test is completed — not after single-section practice, where a
+   percentage alone is a more honest signal. */
+const STANINE_BANDS = [
+  { min:96, max:100, stanine:9 },
+  { min:90, max:95,  stanine:8 },
+  { min:83, max:89,  stanine:7 },
+  { min:75, max:82,  stanine:6 },
+  { min:65, max:74,  stanine:5 },
+  { min:55, max:64,  stanine:4 },
+  { min:45, max:54,  stanine:3 },
+  { min:35, max:44,  stanine:2 },
+  { min:0,  max:34,  stanine:1 },
+];
 function stanineFromPercent(pct){
-  if(pct>=96) return 9; if(pct>=89) return 8; if(pct>=77) return 7; if(pct>=60) return 6;
-  if(pct>=40) return 5; if(pct>=23) return 4; if(pct>=11) return 3; if(pct>=4) return 2;
+  for(const b of STANINE_BANDS){ if(pct>=b.min) return b.stanine; }
   return 1;
 }
 
-/* ---------------- Persistent storage (optional) ---------------- */
-async function storageSafeSet(key, value){
-  try{ if(window.storage){ await window.storage.set(key, JSON.stringify(value), false); } }catch(e){}
+/* ---------------- Persistent storage ----------------
+   Uses the browser's own localStorage, since this site is meant to be
+   hosted and visited directly (e.g. GitHub Pages) rather than only
+   previewed inside Claude. Progress is saved per-browser/per-device only —
+   there's no account system or central server. Wrapped in try/catch since
+   some browsers restrict storage in private/incognito modes. */
+const LS_PREFIX = 'readysetprep:';
+function storageSafeSet(key, value){
+  try{ localStorage.setItem(LS_PREFIX+key, JSON.stringify(value)); return true; }catch(e){ return false; }
 }
-async function storageSafeGet(key){
-  try{ if(window.storage){ const r = await window.storage.get(key, false); return r ? JSON.parse(r.value) : null; } }catch(e){ return null; }
-  return null;
+function storageSafeGet(key){
+  try{ const raw = localStorage.getItem(LS_PREFIX+key); return raw ? JSON.parse(raw) : null; }catch(e){ return null; }
+}
+function storageSafeRemove(key){
+  try{ localStorage.removeItem(LS_PREFIX+key); }catch(e){}
 }
 
 /* ---------------- App state ---------------- */
@@ -87,12 +108,16 @@ function currentFlat(){ return state.testId ? FLAT_BY_TEST[state.levelId][state.
 function currentMinutes(){ return (state.minutes[state.levelId] && state.minutes[state.levelId][state.testId]) || {}; }
 function currentSelected(){ return (state.selectedSections[state.levelId] && state.selectedSections[state.levelId][state.testId]) || {}; }
 function sectionOrder(){ return currentLevel().sectionOrder.filter(id => currentTest() && currentTest().sections[id]); }
+function isFullTest(){
+  const full = sectionOrder();
+  return state.activeSections.length === full.length && full.every(id => state.activeSections.includes(id));
+}
 function levelHasTests(levelId){ return Object.keys(TESTS[levelId]).length > 0; }
 
 async function loadSaved(){
-  const name = await storageSafeGet('trailhead:studentName'); if(name) state.studentName = name;
-  const mins = await storageSafeGet('trailhead:minutes'); if(mins) state.minutes = mins;
-  const hist = await storageSafeGet('trailhead:history'); if(hist) state.history = hist;
+  const name = await storageSafeGet('studentName'); if(name) state.studentName = name;
+  const mins = await storageSafeGet('minutes'); if(mins) state.minutes = mins;
+  const hist = await storageSafeGet('history'); if(hist) state.history = hist;
   ensureMinutesFor(state.levelId, state.testId);
   ensureSelectedFor(state.levelId, state.testId);
   render();
@@ -168,10 +193,11 @@ async function finishExpedition(){
     date:new Date().toISOString(), name: state.studentName||'Explorer',
     levelLabel: currentLevel().label, testLabel: currentTest().label,
     mode: state.mode, sections: state.activeSections.map(id=>currentTest().sections[id].shortName),
+    isFull: isFullTest(),
     ...summary
   });
   state.history = state.history.slice(0,15);
-  await storageSafeSet('trailhead:history', state.history);
+  storageSafeSet('history', state.history);
   state.screen='results'; render();
 }
 function computeSummary(){
@@ -204,7 +230,7 @@ function playPassage(passageId, text){
 }
 function toggleScript(passageId){ state.scriptShown[passageId] = !state.scriptShown[passageId]; render(); }
 function updateSetting(section, minutes){ currentMinutes()[section]=Math.max(1, Math.min(90, parseInt(minutes)||1)); }
-async function saveSettingsAndHome(){ await storageSafeSet('trailhead:minutes', state.minutes); await storageSafeSet('trailhead:studentName', state.studentName); goHome(); }
+async function saveSettingsAndHome(){ await storageSafeSet('minutes', state.minutes); await storageSafeSet('studentName', state.studentName); goHome(); }
 function fmtTime(sec){ const m=Math.floor(sec/60), s=sec%60; return `${m}:${s.toString().padStart(2,'0')}`; }
 function updateTimerBadge(){
   const el=document.getElementById('timerBadge'); if(!el) return;
@@ -416,9 +442,10 @@ function homeScreen(){
   <div class="card">
     <div class="log-title">Past expeditions</div>
     ${state.history.length===0 ? `<div class="empty-log">No expeditions yet — your first one will show up here as a journal stamp.</div>` :
-      state.history.map(h=>`<div class="log-entry"><span>${new Date(h.date).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})} — ${esc(h.name)} · ${esc(h.levelLabel||'')} ${esc(h.testLabel||'')} · <span class="mode-pill">${h.mode||'timed'}</span></span><span class="stamp">${h.totalQ ? h.overallPct+'%' : ''} ${h.totalQ ? '<span class="stanine-badge" title="Practice stanine estimate">'+h.overallStanine+'</span>' : ''}</span></div>`).join('')}
+      state.history.map(h=>`<div class="log-entry"><span>${new Date(h.date).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})} — ${esc(h.name)} · ${esc(h.levelLabel||'')} ${esc(h.testLabel||'')} · <span class="mode-pill">${h.mode||'timed'}</span>${!h.isFull && h.totalQ ? ' <span class="mode-pill">section</span>' : ''}</span><span class="stamp">${h.totalQ ? h.overallPct+'%' : ''} ${h.totalQ && h.isFull ? '<span class="stanine-badge" title="Practice stanine estimate — full test only">'+h.overallStanine+'</span>' : ''}</span></div>`).join('')}
   </div>
   ${state.levelId==='primary' && test ? `<div class="callout">📌 A heads-up: 4 math questions in Test #2 (the cherry-sharing group, the missing puzzle piece, and the two reflection/symmetry questions) use original diagrams rebuilt to match the workbook's answer key, since their source images weren't available as text. Worth double-checking those four against the printed workbook.</div>` : ''}
+  <div class="footer-links"><a href="privacy.html">Privacy notice</a></div>
   `;
 }
 function sectionLabelGuess(id){
@@ -585,16 +612,23 @@ function resultsScreen(){
   const s = computeSummary();
   const test = currentTest();
   const level = currentLevel();
+  const fullTest = isFullTest();
   return `
   <div class="hero"><h2>Basecamp report</h2>
-    <p>${state.studentName ? esc(state.studentName) : 'Explorer'} finished ${esc(level.label)} · ${esc(test.label)} <span class="mode-pill" style="background:rgba(255,255,255,0.2); color:var(--paper);">${state.mode==='timed'?'⏱ Timed':'✏️ Untimed'}</span></p>
+    <p>${state.studentName ? esc(state.studentName) : 'Explorer'} finished ${esc(level.label)} · ${esc(test.label)} <span class="mode-pill" style="background:rgba(255,255,255,0.2); color:var(--paper);">${state.mode==='timed'?'⏱ Timed':'✏️ Untimed'}</span>${!fullTest && s.totalQ ? ` <span class="mode-pill" style="background:rgba(255,255,255,0.2); color:var(--paper);">Section practice</span>` : ''}</p>
     ${s.totalQ ? `
     <div class="score-hero-stats">
       <div class="score-stat"><div class="big">${s.totalCorrect}/${s.totalQ}</div><div class="lbl">correct</div></div>
       <div class="score-stat"><div class="big">${s.overallPct}%</div><div class="lbl">percentage</div></div>
-      <div class="score-stat"><div class="big">${s.overallStanine}<span class="stanine-badge" style="width:22px;height:22px;font-size:12px;vertical-align:middle;">≈</span></div><div class="lbl">practice stanine (est.)</div></div>
+      ${fullTest ? `<div class="score-stat"><div class="big">${s.overallStanine}<span class="stanine-badge" style="width:22px;height:22px;font-size:12px;vertical-align:middle;">≈</span></div><div class="lbl">practice stanine (est.)</div></div>` : ''}
     </div>
-    <p class="disclaimer-small" style="color:rgba(255,255,255,0.8);">Practice stanine is an estimate from percent correct, not an official ERB score — the real ISEE stanine compares you to a national pool of applicants, which this site can't replicate.</p>
+    ${fullTest ? `
+    <p class="disclaimer-small" style="color:rgba(255,255,255,0.8);">Practice stanine is an estimate from percent correct on this practice test, not an official ERB score — the real ISEE stanine is norm-referenced by grade using ERB's national test-taking population, which this site can't replicate. Shown only after a full test, since a single section isn't a reliable enough sample.</p>
+    <details class="stanine-details"><summary>Show practice stanine bands</summary>
+      <div class="stanine-band-table">
+        ${STANINE_BANDS.slice().reverse().map(b=>`<div class="stanine-band-row ${b.stanine===s.overallStanine?'current':''}"><span>Stanine ${b.stanine}</span><span>${b.min}${b.max<100?'–'+b.max:'+'}%</span></div>`).join('')}
+      </div>
+    </details>` : `<p class="disclaimer-small" style="color:rgba(255,255,255,0.8);">Practice stanine only appears after a full test — this was section practice, so percentage is the fairer signal here.</p>`}
     ` : `<p style="margin-top:10px;">This session was writing practice only — nothing to score.</p>`}
   </div>
   <div class="stamp-grid">${state.activeSections.map(id=>{
@@ -603,12 +637,13 @@ function resultsScreen(){
     if(p.isEssay){
       return `<div class="stamp-card"><div class="icon">${sec.icon}</div><h4>${sec.name}</h4><div class="score">${p.words}</div><div class="score-label">words · not scored</div></div>`;
     }
-    return `<div class="stamp-card"><div class="icon">${sec.icon}</div><h4>${sec.name}</h4><div class="score">${p.correct}/${p.total}</div><div class="score-label">${p.pct}% · stanine ${p.stanine}</div></div>`;
+    return `<div class="stamp-card"><div class="icon">${sec.icon}</div><h4>${sec.name}</h4><div class="score">${p.correct}/${p.total}</div><div class="score-label">${p.pct}%${fullTest?' · stanine '+p.stanine:''}</div></div>`;
   }).join('')}
   </div>
   <div class="card">
     <div class="retake-row">
       <button class="btn btn-secondary" onclick="state.screen='review'; render();">📋 Review answers &amp; explanations</button>
+      <button class="btn btn-secondary" onclick="window.print()">🖨️ Print results</button>
       <button class="btn btn-primary" onclick="retakeSameSession()">🔁 Retake this session</button>
       <button class="btn btn-ghost" onclick="goHome()">🏠 Back to trailhead</button>
     </div>

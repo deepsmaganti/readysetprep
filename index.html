@@ -172,6 +172,23 @@
   .mode-pill{ font-size:11px; font-weight:700; padding:3px 10px; border-radius:999px; background:var(--sky); color:var(--fern-deep); text-transform:uppercase; letter-spacing:0.03em; }
   .retake-row{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:4px; }
 
+  .stanine-details{ margin-top:12px; }
+  .stanine-details summary{ cursor:pointer; font-size:12px; font-weight:700; color:rgba(255,255,255,0.9); }
+  .stanine-band-table{ margin-top:10px; background:rgba(255,255,255,0.1); border-radius:12px; padding:6px 14px; }
+  .stanine-band-row{ display:flex; justify-content:space-between; padding:5px 0; font-size:13px; color:rgba(255,255,255,0.9); border-bottom:1px solid rgba(255,255,255,0.12); font-family:'Space Mono',monospace; }
+  .stanine-band-row:last-child{ border-bottom:none; }
+  .stanine-band-row.current{ color:#fff; font-weight:700; }
+  .footer-links{ text-align:center; margin-top:18px; }
+  .footer-links a{ color:var(--ink-soft); font-size:12px; text-decoration:underline; }
+
+  @media print{
+    .topbar, .nav-row, .retake-row, .mode-toggle, .section-chips, .trail-progress, .test-picker, .level-picker, .footer-links, .callout{ display:none !important; }
+    body{ background:#fff; }
+    .card, .hero{ box-shadow:none; border:1px solid #ddd; }
+    .hero{ background:#fff !important; color:var(--ink) !important; }
+    .hero p, .score-stat .lbl, .disclaimer-small{ color:var(--ink-soft) !important; }
+  }
+
   .essay-textarea{
     width:100%; min-height:260px; border-radius:var(--radius-md); border:2px solid var(--sky-deep);
     padding:16px; font-family:'Atkinson Hyperlegible', sans-serif; font-size:16px; line-height:1.6; resize:vertical;
