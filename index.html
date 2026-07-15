@@ -144,6 +144,34 @@
   .empty-state .icon{ font-size:36px; margin-bottom:10px; }
   .empty-state p{ color:var(--ink-soft); font-size:14px; max-width:42ch; margin:6px auto 0; line-height:1.6; }
 
+  .mode-toggle{ display:flex; gap:10px; margin:18px 0 14px; }
+  .mode-btn{
+    flex:1; background:rgba(255,255,255,0.12); border:2px solid rgba(255,255,255,0.4); color:var(--paper);
+    border-radius:14px; padding:12px; font-weight:700; font-size:14px; text-align:center;
+  }
+  .mode-btn.active{ background:var(--paper); color:var(--fern-deep); border-color:var(--paper); }
+  .mode-btn .sub{ display:block; font-size:11px; font-weight:400; opacity:0.85; margin-top:2px; }
+
+  .section-chips{ display:flex; flex-wrap:wrap; gap:8px; margin:12px 0 18px; }
+  .chip{
+    background:rgba(255,255,255,0.12); border:2px solid rgba(255,255,255,0.4); color:var(--paper);
+    border-radius:999px; padding:8px 14px; font-size:13px; font-weight:700;
+  }
+  .chip.active{ background:var(--coral); border-color:var(--coral); }
+  .chip-select-all{ background:transparent; border:2px dashed rgba(255,255,255,0.5); color:var(--paper); border-radius:999px; padding:8px 14px; font-size:12px; font-weight:700; }
+
+  .score-hero-stats{ display:flex; gap:22px; flex-wrap:wrap; margin-top:16px; }
+  .score-stat{ }
+  .score-stat .big{ font-family:'Space Mono',monospace; font-size:30px; font-weight:700; line-height:1; }
+  .score-stat .lbl{ font-size:12px; opacity:0.85; margin-top:4px; }
+  .stanine-badge{
+    display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:50%;
+    background:var(--gold); color:#5c420e; font-family:'Space Mono',monospace; font-weight:700; font-size:13px; margin-left:6px;
+  }
+  .disclaimer-small{ font-size:11px; color:var(--ink-soft); margin-top:10px; line-height:1.5; }
+  .mode-pill{ font-size:11px; font-weight:700; padding:3px 10px; border-radius:999px; background:var(--sky); color:var(--fern-deep); text-transform:uppercase; letter-spacing:0.03em; }
+  .retake-row{ display:flex; gap:12px; flex-wrap:wrap; justify-content:center; margin-top:4px; }
+
   .essay-textarea{
     width:100%; min-height:260px; border-radius:var(--radius-md); border:2px solid var(--sky-deep);
     padding:16px; font-family:'Atkinson Hyperlegible', sans-serif; font-size:16px; line-height:1.6; resize:vertical;
@@ -568,6 +596,20 @@ LEVEL_IDS.forEach(lid=>{
   });
 });
 
+/* ---------------- Scoring helpers ---------------- */
+function pctOf(correct, total){ return total ? Math.round((correct/total)*100) : 0; }
+/* NOTE: This is a PRACTICE ESTIMATE, not an official ERB stanine. Real ISEE
+   stanines compare a student's raw score to a national pool of applicants
+   in the same grade — data this site has no access to. This function maps
+   percent-correct onto the standard stanine percentile bands (4/11/23/40/
+   60/77/89/96) purely as a rough, consistent way to track practice trends
+   over time. Always labeled "practice stanine estimate" in the UI. */
+function stanineFromPercent(pct){
+  if(pct>=96) return 9; if(pct>=89) return 8; if(pct>=77) return 7; if(pct>=60) return 6;
+  if(pct>=40) return 5; if(pct>=23) return 4; if(pct>=11) return 3; if(pct>=4) return 2;
+  return 1;
+}
+
 /* ---------------- Persistent storage (optional) ---------------- */
 async function storageSafeSet(key, value){
   try{ if(window.storage){ await window.storage.set(key, JSON.stringify(value), false); } }catch(e){}
@@ -584,9 +626,12 @@ const state = {
   screen:'home', studentName:'',
   levelId: 'primary',
   testId: firstTestId('primary'),
-  minutes:{}, // minutes[levelId][testId][sectionId]
-  sectionIdx:0, qIdx:0, answers:{}, timeRemaining:0, timerId:null, audioPlays:{}, scriptShown:{}, history:[],
-  essayText:''
+  minutes:{},            // minutes[levelId][testId][sectionId]
+  selectedSections:{},   // selectedSections[levelId][testId][sectionId] = bool
+  mode: 'timed',         // 'timed' | 'untimed'
+  activeSections: [],    // section ids included in the CURRENT attempt, in order
+  sectionIdx:0, qIdx:0, answers:{}, timeRemaining:0, timeElapsed:0, timerId:null,
+  audioPlays:{}, scriptShown:{}, history:[], essayText:''
 };
 function ensureMinutesFor(levelId, testId){
   if(!testId) return;
@@ -599,13 +644,25 @@ function ensureMinutesFor(levelId, testId){
   });
   state.minutes[levelId][testId] = m;
 }
+function ensureSelectedFor(levelId, testId){
+  if(!testId) return;
+  state.selectedSections[levelId] = state.selectedSections[levelId] || {};
+  if(state.selectedSections[levelId][testId]) return;
+  const s = {};
+  LEVELS[levelId].sectionOrder.forEach(sid=>{
+    if(TESTS[levelId][testId].sections[sid]) s[sid] = true;
+  });
+  state.selectedSections[levelId][testId] = s;
+}
 ensureMinutesFor(state.levelId, state.testId);
+ensureSelectedFor(state.levelId, state.testId);
 
 function currentLevel(){ return LEVELS[state.levelId]; }
 function currentTest(){ return state.testId ? TESTS[state.levelId][state.testId] : null; }
 function currentFlat(){ return state.testId ? FLAT_BY_TEST[state.levelId][state.testId] : null; }
 function currentMinutes(){ return (state.minutes[state.levelId] && state.minutes[state.levelId][state.testId]) || {}; }
-function sectionOrder(){ return currentLevel().sectionOrder; }
+function currentSelected(){ return (state.selectedSections[state.levelId] && state.selectedSections[state.levelId][state.testId]) || {}; }
+function sectionOrder(){ return currentLevel().sectionOrder.filter(id => currentTest() && currentTest().sections[id]); }
 function levelHasTests(levelId){ return Object.keys(TESTS[levelId]).length > 0; }
 
 async function loadSaved(){
@@ -613,6 +670,7 @@ async function loadSaved(){
   const mins = await storageSafeGet('trailhead:minutes'); if(mins) state.minutes = mins;
   const hist = await storageSafeGet('trailhead:history'); if(hist) state.history = hist;
   ensureMinutesFor(state.levelId, state.testId);
+  ensureSelectedFor(state.levelId, state.testId);
   render();
 }
 
@@ -623,43 +681,79 @@ function chooseLevel(levelId){
   state.levelId = levelId;
   state.testId = firstTestId(levelId);
   ensureMinutesFor(state.levelId, state.testId);
+  ensureSelectedFor(state.levelId, state.testId);
   render();
 }
-function chooseTest(testId){ state.testId = testId; ensureMinutesFor(state.levelId, state.testId); render(); }
-function startExpedition(){
+function chooseTest(testId){ state.testId = testId; ensureMinutesFor(state.levelId, state.testId); ensureSelectedFor(state.levelId, state.testId); render(); }
+function setMode(m){ state.mode = m; render(); }
+function toggleSectionSelected(secId){
+  const sel = currentSelected();
+  const onCount = Object.values(sel).filter(Boolean).length;
+  if(sel[secId] && onCount<=1) return; // keep at least one section selected
+  sel[secId] = !sel[secId];
+  render();
+}
+function selectAllSections(){
+  const sel = currentSelected();
+  sectionOrder().forEach(id=> sel[id]=true);
+  render();
+}
+
+function startPractice(){
   if(!state.testId) return;
+  state.activeSections = sectionOrder().filter(id => currentSelected()[id]);
+  if(state.activeSections.length===0) return;
+  state.sectionIdx=0; state.answers={}; state.audioPlays={}; state.scriptShown={}; state.essayText='';
+  enterSectionIntro(0);
+}
+function retakeSameSession(){
   state.sectionIdx=0; state.answers={}; state.audioPlays={}; state.scriptShown={}; state.essayText='';
   enterSectionIntro(0);
 }
 function enterSectionIntro(idx){ state.sectionIdx=idx; state.screen='sectionIntro'; render(); }
 function beginSection(){
-  const secId = sectionOrder()[state.sectionIdx];
+  const secId = state.activeSections[state.sectionIdx];
   const sec = currentTest().sections[secId];
-  state.qIdx=0; state.timeRemaining=currentMinutes()[secId]*60; state.essayText='';
+  state.qIdx=0; state.essayText='';
+  if(state.mode==='timed'){ state.timeRemaining = currentMinutes()[secId]*60; } else { state.timeElapsed = 0; }
   state.screen = isEssaySection(sec) ? 'essay' : 'question';
   startTimer(); render();
 }
-function startTimer(){ stopTimer(); state.timerId=setInterval(()=>{ state.timeRemaining--; updateTimerBadge(); if(state.timeRemaining<=0){ stopTimer(); finishSection(); } },1000); }
+function startTimer(){
+  stopTimer();
+  state.timerId=setInterval(()=>{
+    if(state.mode==='timed'){
+      state.timeRemaining--; updateTimerBadge();
+      if(state.timeRemaining<=0){ stopTimer(); finishSection(); }
+    } else {
+      state.timeElapsed++; updateTimerBadge();
+    }
+  },1000);
+}
 function stopTimer(){ if(state.timerId){ clearInterval(state.timerId); state.timerId=null; } }
-function currentSectionFlat(){ return currentFlat()[sectionOrder()[state.sectionIdx]]; }
+function currentSectionFlat(){ return currentFlat()[state.activeSections[state.sectionIdx]]; }
 function selectChoice(choiceIdx){ const q = currentSectionFlat()[state.qIdx]; state.answers[q.id]=choiceIdx; render(); }
 function nextQuestion(){ const flat=currentSectionFlat(); if(state.qIdx<flat.length-1){ state.qIdx++; render(); } else { stopTimer(); finishSection(); } }
 function prevQuestion(){ if(state.qIdx>0){ state.qIdx--; render(); } }
 function finishEssay(){ stopTimer(); finishSection(); }
 function finishSection(){ state.screen='sectionBreak'; render(); }
-function nextSectionOrResults(){ if(state.sectionIdx<sectionOrder().length-1){ enterSectionIntro(state.sectionIdx+1); } else { finishExpedition(); } }
+function nextSectionOrResults(){ if(state.sectionIdx<state.activeSections.length-1){ enterSectionIntro(state.sectionIdx+1); } else { finishExpedition(); } }
 async function finishExpedition(){
   const summary = computeSummary();
-  state.history.unshift({ date:new Date().toISOString(), name: state.studentName||'Explorer', levelLabel: currentLevel().label, testLabel: currentTest().label, ...summary });
-  state.history = state.history.slice(0,10);
+  state.history.unshift({
+    date:new Date().toISOString(), name: state.studentName||'Explorer',
+    levelLabel: currentLevel().label, testLabel: currentTest().label,
+    mode: state.mode, sections: state.activeSections.map(id=>currentTest().sections[id].shortName),
+    ...summary
+  });
+  state.history = state.history.slice(0,15);
   await storageSafeSet('trailhead:history', state.history);
   state.screen='results'; render();
 }
 function computeSummary(){
   const perSection={}; let totalCorrect=0, totalQ=0;
-  sectionOrder().forEach(id=>{
+  state.activeSections.forEach(id=>{
     const sec = currentTest().sections[id];
-    if(!sec) return;
     if(isEssaySection(sec)){
       const words = state.essayText.trim() ? state.essayText.trim().split(/\s+/).length : 0;
       perSection[id] = { isEssay:true, words };
@@ -667,9 +761,12 @@ function computeSummary(){
     }
     const flat=currentFlat()[id]; let correct=0;
     flat.forEach(q=>{ if(state.answers[q.id]===q.correct) correct++; });
-    perSection[id]={ correct, total:flat.length }; totalCorrect+=correct; totalQ+=flat.length;
+    const pct = pctOf(correct, flat.length);
+    perSection[id]={ correct, total:flat.length, pct, stanine: stanineFromPercent(pct) };
+    totalCorrect+=correct; totalQ+=flat.length;
   });
-  return { perSection, totalCorrect, totalQ };
+  const overallPct = pctOf(totalCorrect, totalQ);
+  return { perSection, totalCorrect, totalQ, overallPct, overallStanine: stanineFromPercent(overallPct) };
 }
 function playPassage(passageId, text){
   state.audioPlays[passageId]=(state.audioPlays[passageId]||0)+1;
@@ -687,9 +784,13 @@ async function saveSettingsAndHome(){ await storageSafeSet('trailhead:minutes', 
 function fmtTime(sec){ const m=Math.floor(sec/60), s=sec%60; return `${m}:${s.toString().padStart(2,'0')}`; }
 function updateTimerBadge(){
   const el=document.getElementById('timerBadge'); if(!el) return;
-  el.textContent=fmtTime(Math.max(0,state.timeRemaining));
   el.classList.remove('warn','danger');
-  if(state.timeRemaining<=15) el.classList.add('danger'); else if(state.timeRemaining<=60) el.classList.add('warn');
+  if(state.mode==='timed'){
+    el.textContent=fmtTime(Math.max(0,state.timeRemaining));
+    if(state.timeRemaining<=15) el.classList.add('danger'); else if(state.timeRemaining<=60) el.classList.add('warn');
+  } else {
+    el.textContent=fmtTime(state.timeElapsed)+' elapsed';
+  }
 }
 
 /* ---------------- Figure rendering ---------------- */
@@ -810,24 +911,39 @@ function homeScreen(){
   const test = currentTest();
   const flat = currentFlat();
   const mins = currentMinutes();
+  const sel = currentSelected();
 
   let heroHtml;
   if(test){
-    const totalMin = sectionOrder().reduce((a,id)=> a + (mins[id]||0), 0);
-    const totalQ = sectionOrder().reduce((a,id)=>{ const f=flat[id]; return a + (f ? f.length : 0); }, 0);
+    const included = sectionOrder().filter(id=>sel[id]);
+    const totalMin = included.reduce((a,id)=> a + (mins[id]||0), 0);
+    const totalQ = included.reduce((a,id)=>{ const f=flat[id]; return a + (f ? f.length : 0); }, 0);
+    const isFull = included.length === sectionOrder().length;
     heroHtml = `
     <div class="hero">
       <h2>${state.studentName ? esc(state.studentName)+"'s" : 'Ready for an'} expedition?</h2>
-      <p>${esc(level.label)} Level · ${esc(test.label)} — ${totalQ} scored questions, about ${totalMin} minutes${sectionOrder().some(id=>test.sections[id] && isEssaySection(test.sections[id])) ? ' plus an essay' : ''}.</p>
+      <p>${esc(level.label)} Level · ${esc(test.label)} — ${isFull ? 'full test' : included.map(id=>test.sections[id].shortName).join(' + ')}, ${totalQ} scored questions${state.mode==='timed' ? `, about ${totalMin} minutes` : ', untimed'}.</p>
+
+      <div class="mode-toggle">
+        <button class="mode-btn ${state.mode==='timed'?'active':''}" onclick="setMode('timed')">⏱ Timed<span class="sub">Official ISEE time limits</span></button>
+        <button class="mode-btn ${state.mode==='untimed'?'active':''}" onclick="setMode('untimed')">✏️ Untimed<span class="sub">No pressure — practice at your own pace</span></button>
+      </div>
+
+      <div class="log-title" style="color:rgba(255,255,255,0.85);">Which sections?</div>
+      <div class="section-chips">
+        ${sectionOrder().map(id=>`<button class="chip ${sel[id]?'active':''}" onclick="toggleSectionSelected('${id}')">${test.sections[id].icon} ${test.sections[id].shortName}</button>`).join('')}
+        <button class="chip-select-all" onclick="selectAllSections()">Select all</button>
+      </div>
+
       <div class="trailmap">
         ${sectionOrder().map((id,i)=>{
-          const sec = test.sections[id]; if(!sec) return '';
+          const sec = test.sections[id];
           const f = flat[id];
-          return `<div class="waypoint"><div class="dot">${sec.icon}</div><div class="label">${sec.shortName}</div><div class="sub">${mins[id]} min${f?` · ${f.length}q`:''}</div></div>
+          return `<div class="waypoint" style="${sel[id]?'':'opacity:0.4;'}"><div class="dot">${sec.icon}</div><div class="label">${sec.shortName}</div><div class="sub">${mins[id]} min${f?` · ${f.length}q`:''}</div></div>
           ${i<sectionOrder().length-1?'<div class="trail-line"></div>':''}`;
         }).join('')}
       </div>
-      <button class="btn btn-primary btn-lg" onclick="startExpedition()">Start today's expedition →</button>
+      <button class="btn btn-primary btn-lg" onclick="startPractice()">${isFull ? "Start today's expedition" : 'Start selected sections'} →</button>
     </div>`;
   } else {
     heroHtml = `
@@ -863,10 +979,10 @@ function homeScreen(){
     <div class="test-picker">
       ${Object.keys(TESTS[state.levelId]).map(tid=>{
         const tt = TESTS[state.levelId][tid]; const f = FLAT_BY_TEST[state.levelId][tid];
-        const q = sectionOrder().reduce((a,id)=> a + (f[id] ? f[id].length : 0), 0);
+        const q = LEVELS[state.levelId].sectionOrder.filter(id=>tt.sections[id]).reduce((a,id)=> a + (f[id] ? f[id].length : 0), 0);
         const active = tid===state.testId;
         return `<div class="test-card ${active?'active':''}">
-          <div><h4>${esc(tt.label)}</h4><p>${q} scored questions${sectionOrder().some(id=>tt.sections[id] && isEssaySection(tt.sections[id]))?' + essay':''}</p></div>
+          <div><h4>${esc(tt.label)}</h4><p>${q} scored questions${LEVELS[state.levelId].sectionOrder.some(id=>tt.sections[id] && isEssaySection(tt.sections[id]))?' + essay':''} · can be retaken any time</p></div>
           ${active ? `<span class="test-card-badge">Selected</span>` : `<button class="btn btn-ghost btn-sm" onclick="chooseTest('${tid}')">Select</button>`}
         </div>`;
       }).join('')}
@@ -876,13 +992,13 @@ function homeScreen(){
   <div class="card">
     <div class="log-title">Past expeditions</div>
     ${state.history.length===0 ? `<div class="empty-log">No expeditions yet — your first one will show up here as a journal stamp.</div>` :
-      state.history.map(h=>`<div class="log-entry"><span>${new Date(h.date).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})} — ${esc(h.name)} · ${esc(h.levelLabel||'')} ${esc(h.testLabel||'')}</span><span class="stamp">${h.totalCorrect}/${h.totalQ} correct</span></div>`).join('')}
+      state.history.map(h=>`<div class="log-entry"><span>${new Date(h.date).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})} — ${esc(h.name)} · ${esc(h.levelLabel||'')} ${esc(h.testLabel||'')} · <span class="mode-pill">${h.mode||'timed'}</span></span><span class="stamp">${h.totalQ ? h.overallPct+'%' : ''} ${h.totalQ ? '<span class="stanine-badge" title="Practice stanine estimate">'+h.overallStanine+'</span>' : ''}</span></div>`).join('')}
   </div>
   ${state.levelId==='primary' && test ? `<div class="callout">📌 A heads-up: 4 math questions in Test #2 (the cherry-sharing group, the missing puzzle piece, and the two reflection/symmetry questions) use original diagrams rebuilt to match the workbook's answer key, since their source images weren't available as text. Worth double-checking those four against the printed workbook.</div>` : ''}
   `;
 }
 function sectionLabelGuess(id){
-  const names = { auditory:'Auditory Comprehension', reading: (LEVELS[state.levelId] && LEVELS[state.levelId].id==='primary') ? 'Reading' : 'Reading Comprehension', math:'Mathematics', verbal:'Verbal Reasoning', quantitative:'Quantitative Reasoning', mathAch:'Mathematics Achievement', essay:'Essay' };
+  const names = { auditory:'Auditory Comprehension', reading: (state.levelId==='primary') ? 'Reading' : 'Reading Comprehension', math:'Mathematics', verbal:'Verbal Reasoning', quantitative:'Quantitative Reasoning', mathAch:'Mathematics Achievement', essay:'Essay' };
   return names[id] || id;
 }
 
@@ -903,9 +1019,9 @@ function settingsScreen(){
     <h2 style="margin-bottom:16px;">Parent setup</h2>
     <div class="settings-row"><div><label>Explorer's name</label><span class="hint">Shown on the trailhead and score log</span></div>
       <input class="text-input" style="width:160px;" value="${esc(state.studentName)}" oninput="state.studentName=this.value" placeholder="e.g. Aashvi"></div>
-    <div class="settings-row"><div><label>Time limits for</label><span class="hint">${esc(level.label)} · ${esc(test.label)}</span></div></div>
+    <div class="settings-row"><div><label>Time limits for</label><span class="hint">${esc(level.label)} · ${esc(test.label)} — used in Timed mode only</span></div></div>
     ${sectionOrder().map(id=>{
-      const sec = test.sections[id]; if(!sec) return '';
+      const sec = test.sections[id];
       return `<div class="settings-row"><div><label>${sec.name} time limit</label><span class="hint">Official ISEE timing: ${sec.defaultMinutes} minutes</span></div>
       <input class="num-input" type="number" min="1" max="90" value="${mins[id]}" oninput="updateSetting('${id}', this.value)"> min</div>`;
     }).join('')}
@@ -914,20 +1030,21 @@ function settingsScreen(){
 }
 
 function sectionIntroScreen(){
-  const secId = sectionOrder()[state.sectionIdx]; const sec = currentTest().sections[secId];
+  const secId = state.activeSections[state.sectionIdx]; const sec = currentTest().sections[secId];
   const mins = currentMinutes();
   const flat = currentFlat()[secId];
   return `<div class="card">
     <div class="intro-icon">${sec.icon}</div>
+    <span class="mode-pill">${state.mode==='timed'?'⏱ Timed':'✏️ Untimed'}</span>
     <h2>${sec.name}</h2>
-    <p style="color:var(--ink-soft); margin-top:4px;">Section ${state.sectionIdx+1} of ${sectionOrder().length} · ${mins[secId]} minutes${flat?` · ${flat.length} questions`:' · unscored writing sample'}</p>
+    <p style="color:var(--ink-soft); margin-top:4px;">Section ${state.sectionIdx+1} of ${state.activeSections.length} · ${state.mode==='timed' ? mins[secId]+' minutes' : 'no time limit'}${flat?` · ${flat.length} questions`:' · unscored writing sample'}</p>
     <ul class="intro-list">${sec.instructions.map(t=>`<li>${t}</li>`).join('')}</ul>
     <div class="nav-row"><button class="btn btn-ghost" onclick="goHome()">Back to trailhead</button><button class="btn btn-primary btn-lg" onclick="beginSection()">Begin ${sec.shortName} →</button></div>
   </div>`;
 }
 
 function questionScreen(){
-  const secId = sectionOrder()[state.sectionIdx];
+  const secId = state.activeSections[state.sectionIdx];
   const flat = currentSectionFlat();
   const q = flat[state.qIdx];
   const selected = state.answers[q.id];
@@ -969,7 +1086,7 @@ function questionScreen(){
   return `
   <div class="test-topbar">
     <div class="section-chip">${secMeta.icon} ${secMeta.name} — Q${state.qIdx+1} of ${flat.length}</div>
-    <div class="timer-badge mono" id="timerBadge">${fmtTime(state.timeRemaining)}</div>
+    <div class="timer-badge mono ${state.mode==='untimed'?'':''}" id="timerBadge">${state.mode==='timed'?fmtTime(state.timeRemaining):fmtTime(state.timeElapsed)+' elapsed'}</div>
   </div>
   <div class="trail-progress">
     ${flat.map((qq,i)=>`${i>0?'<div class="trail-seg"></div>':''}<div class="trail-dot-wrap"><div class="trail-dot ${i===state.qIdx?'current':(state.answers[qq.id]!==undefined?'answered':'')}"></div></div>`).join('')}
@@ -987,13 +1104,13 @@ function questionScreen(){
 }
 
 function essayScreen(){
-  const secId = sectionOrder()[state.sectionIdx];
+  const secId = state.activeSections[state.sectionIdx];
   const sec = currentTest().sections[secId];
   const wordCount = state.essayText.trim() ? state.essayText.trim().split(/\s+/).length : 0;
   return `
   <div class="test-topbar">
     <div class="section-chip">${sec.icon} ${sec.name}</div>
-    <div class="timer-badge mono" id="timerBadge">${fmtTime(state.timeRemaining)}</div>
+    <div class="timer-badge mono" id="timerBadge">${state.mode==='timed'?fmtTime(state.timeRemaining):fmtTime(state.timeElapsed)+' elapsed'}</div>
   </div>
   <div class="card">
     <span class="essay-tag">Not scored — sent to schools as a writing sample</span>
@@ -1005,9 +1122,9 @@ function essayScreen(){
 }
 
 function sectionBreakScreen(){
-  const secId = sectionOrder()[state.sectionIdx];
+  const secId = state.activeSections[state.sectionIdx];
   const sec = currentTest().sections[secId];
-  const isLast = state.sectionIdx===sectionOrder().length-1;
+  const isLast = state.sectionIdx===state.activeSections.length-1;
   let progressLine;
   if(isEssaySection(sec)){
     const words = state.essayText.trim() ? state.essayText.trim().split(/\s+/).length : 0;
@@ -1015,37 +1132,48 @@ function sectionBreakScreen(){
   } else {
     const flat = currentFlat()[secId];
     let correct=0; flat.forEach(q=>{ if(state.answers[q.id]===q.correct) correct++; });
-    progressLine = `You got ${correct} out of ${flat.length} correct.`;
+    progressLine = `You got ${correct} out of ${flat.length} correct (${pctOf(correct,flat.length)}%).`;
   }
   return `<div class="card" style="text-align:center;">
     <div class="intro-icon" style="margin:0 auto 14px;">🏕️</div>
     <h2>${sec.name} complete!</h2>
     <p style="color:var(--ink-soft); margin:8px 0 0;">${progressLine}</p>
-    ${!isLast ? `<p style="margin-top:4px;">Take a short break, then continue to <strong>${currentTest().sections[sectionOrder()[state.sectionIdx+1]].name}</strong>.</p>` : `<p style="margin-top:4px;">That's the whole expedition — nice work!</p>`}
+    ${!isLast ? `<p style="margin-top:4px;">Take a short break, then continue to <strong>${currentTest().sections[state.activeSections[state.sectionIdx+1]].name}</strong>.</p>` : `<p style="margin-top:4px;">That's the whole session — nice work!</p>`}
     <button class="btn btn-primary btn-lg" style="margin-top:18px;" onclick="nextSectionOrResults()">${isLast?'See my basecamp report →':'Continue →'}</button>
   </div>`;
 }
 
 function resultsScreen(){
   const s = computeSummary();
-  const pct = s.totalQ ? Math.round((s.totalCorrect/s.totalQ)*100) : 0;
   const test = currentTest();
   const level = currentLevel();
   return `
   <div class="hero"><h2>Basecamp report</h2>
-    <p>${state.studentName ? esc(state.studentName) : 'Explorer'} finished ${esc(level.label)} · ${esc(test.label)} with ${s.totalCorrect} out of ${s.totalQ} correct (${pct}%).</p></div>
-  <div class="stamp-grid">${sectionOrder().map(id=>{
-    const sec = test.sections[id]; if(!sec) return '';
+    <p>${state.studentName ? esc(state.studentName) : 'Explorer'} finished ${esc(level.label)} · ${esc(test.label)} <span class="mode-pill" style="background:rgba(255,255,255,0.2); color:var(--paper);">${state.mode==='timed'?'⏱ Timed':'✏️ Untimed'}</span></p>
+    ${s.totalQ ? `
+    <div class="score-hero-stats">
+      <div class="score-stat"><div class="big">${s.totalCorrect}/${s.totalQ}</div><div class="lbl">correct</div></div>
+      <div class="score-stat"><div class="big">${s.overallPct}%</div><div class="lbl">percentage</div></div>
+      <div class="score-stat"><div class="big">${s.overallStanine}<span class="stanine-badge" style="width:22px;height:22px;font-size:12px;vertical-align:middle;">≈</span></div><div class="lbl">practice stanine (est.)</div></div>
+    </div>
+    <p class="disclaimer-small" style="color:rgba(255,255,255,0.8);">Practice stanine is an estimate from percent correct, not an official ERB score — the real ISEE stanine compares you to a national pool of applicants, which this site can't replicate.</p>
+    ` : `<p style="margin-top:10px;">This session was writing practice only — nothing to score.</p>`}
+  </div>
+  <div class="stamp-grid">${state.activeSections.map(id=>{
+    const sec = test.sections[id];
     const p = s.perSection[id];
     if(p.isEssay){
       return `<div class="stamp-card"><div class="icon">${sec.icon}</div><h4>${sec.name}</h4><div class="score">${p.words}</div><div class="score-label">words · not scored</div></div>`;
     }
-    return `<div class="stamp-card"><div class="icon">${sec.icon}</div><h4>${sec.name}</h4><div class="score">${p.correct}/${p.total}</div><div class="score-label">correct</div></div>`;
+    return `<div class="stamp-card"><div class="icon">${sec.icon}</div><h4>${sec.name}</h4><div class="score">${p.correct}/${p.total}</div><div class="score-label">${p.pct}% · stanine ${p.stanine}</div></div>`;
   }).join('')}
   </div>
-  <div class="card" style="display:flex; gap:12px; flex-wrap:wrap; justify-content:center;">
-    <button class="btn btn-secondary" onclick="state.screen='review'; render();">📋 Review answers &amp; explanations</button>
-    <button class="btn btn-primary" onclick="goHome()">🏠 Back to trailhead</button>
+  <div class="card">
+    <div class="retake-row">
+      <button class="btn btn-secondary" onclick="state.screen='review'; render();">📋 Review answers &amp; explanations</button>
+      <button class="btn btn-primary" onclick="retakeSameSession()">🔁 Retake this session</button>
+      <button class="btn btn-ghost" onclick="goHome()">🏠 Back to trailhead</button>
+    </div>
   </div>`;
 }
 
@@ -1055,8 +1183,8 @@ function reviewScreen(){
   return `<div class="card">
     <h2 style="margin-bottom:6px;">Review answers</h2>
     <p style="color:var(--ink-soft); margin-top:0;">Green means correct, coral means it needs another look. Explanations are from the workbook's answer key.</p>
-    ${sectionOrder().map(id=>{
-      const sec = test.sections[id]; if(!sec) return '';
+    ${state.activeSections.map(id=>{
+      const sec = test.sections[id];
       if(isEssaySection(sec)){
         return `<h3 style="margin:22px 0 6px; color:var(--fern-deep); font-size:17px;">${sec.icon} ${sec.name}</h3>
         <div class="review-item"><span class="review-tag skipped">Not scored</span>
