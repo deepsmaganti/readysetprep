@@ -9,9 +9,16 @@ let TEST=null,state=null,timerId=null,speechPaused=false;
 
 function loadScript(src){return new Promise((resolve,reject)=>{const s=document.createElement('script');s.src=src;s.onload=resolve;s.onerror=()=>reject(new Error(`Could not load ${src}`));document.head.appendChild(s);});}
 async function boot(){
-  for(const file of (window.READYSETPREP_TEST_FILES||[])){try{await loadScript(file)}catch(e){console.error(e)}}
+  const testsAlreadyLoaded=RSP.levelOrder.some(id=>RSP.getTestsForLevel(id).length>0);
+  if(!testsAlreadyLoaded){
+    for(const file of (window.READYSETPREP_TEST_FILES||[])){
+      try{await loadScript(file)}
+      catch(e){console.error(e)}
+    }
+  }
   if(!RSP.levels[selectedLevelId]) selectedLevelId='primary2';
-  chooseDefaultTest(false);render();
+  chooseDefaultTest(false);
+  render();
 }
 function testsForLevel(id=selectedLevelId){return RSP.getTestsForLevel(id)}
 function chooseDefaultTest(shouldRender=true){
@@ -145,7 +152,7 @@ function sectionScore(sid){const qs=flattenSection(sectionById(sid));return qs.r
 function stopTimer(){if(timerId){clearInterval(timerId);timerId=null}}
 function startTimer(){stopTimer();if(!state?.timed||!['test','audio','essay'].includes(state.screen))return;const sid=currentSectionId();timerId=setInterval(()=>{state.timeLeft[sid]--;const t=document.querySelector('.timer');if(t){t.textContent=fmtTime(state.timeLeft[sid]);t.classList.toggle('warn',state.timeLeft[sid]<=60)}if(state.timeLeft[sid]<=0){stopTimer();finishSection(true)}save()},1000)}
 function stopAudio(){if('speechSynthesis'in window)speechSynthesis.cancel();speechPaused=false}
-function playAudio(){const sec=currentSection(),sid=sec.id;text=sec.passage?.text||'';state.audioPlays[sid]=(state.audioPlays[sid]||0)+1;save();if('speechSynthesis'in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=.92;u.pitch=1.03;speechSynthesis.speak(u)}const el=document.getElementById('playCount');if(el)el.textContent=`Played ${state.audioPlays[sid]} time${state.audioPlays[sid]===1?'':'s'}`}
+function playAudio(){const sec=currentSection(),sid=sec.id,text=sec.passage?.text||'';state.audioPlays[sid]=(state.audioPlays[sid]||0)+1;save();if('speechSynthesis'in window){speechSynthesis.cancel();const u=new SpeechSynthesisUtterance(text);u.rate=.92;u.pitch=1.03;speechSynthesis.speak(u)}const el=document.getElementById('playCount');if(el)el.textContent=`Played ${state.audioPlays[sid]} time${state.audioPlays[sid]===1?'':'s'}`}
 function pauseAudio(){if(!('speechSynthesis'in window))return;if(speechSynthesis.speaking){speechSynthesis.paused?speechSynthesis.resume():speechSynthesis.pause()}}
 function levelCards(){return RSP.levelOrder.map(id=>{const l=RSP.levels[id],count=testsForLevel(id).length;return `<button class="level-card ${id===selectedLevelId?'active':''}" data-level="${id}" style="--level-accent:${l.accent};--level-soft:${l.soft}"><span class="level-dot">${l.short}</span><strong>${l.label}</strong><small>${count?`${count} test${count===1?'':'s'}`:l.subtitle}</small></button>`}).join('')}
 function bindLevelCards(){document.querySelectorAll('[data-level]').forEach(x=>x.onclick=()=>selectLevel(x.dataset.level))}

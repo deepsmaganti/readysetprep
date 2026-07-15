@@ -1,5 +1,5 @@
-// One root-level file name for every published ReadySetPrep test.
+// Published ReadySetPrep test files.
 window.READYSETPREP_TEST_FILES = [
-  'primary2-test2.js',
-  'primary2-test3.js'
+  'primary2-test1.js',
+  'primary2-test2.js'
 ];

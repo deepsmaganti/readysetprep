@@ -1,4 +1,4 @@
-ReadySetPrep.registerTest({
+window.ReadySetPrep.registerTest({
   "id": "primary2-test2",
   "levelId": "primary2",
   "order": 2,
