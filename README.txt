@@ -1,5 +1,8 @@
 READYSETPREP — ISEE PRACTICE, ALL LEVELS
 Host-ready static website (no server, no build step, no database)
+Interactive: jump to any question via the question palette, flag questions
+for review, check a per-section review screen before submitting, and
+resume a saved-in-progress test after closing the browser.
 
 FILES
 - index.html   the app shell — page structure and styling, rarely changes
@@ -33,8 +36,11 @@ CURRENT DATA MODEL
 - Each browser/device stores its own progress locally (via localStorage).
   There is no teacher dashboard, no account system, and no central score
   database.
-- On a shared device/browser, one student's saved session (name, history)
-  can be overwritten by the next student's session.
+- An in-progress test autosaves after every answer/flag/timer tick, so a
+  closed browser tab can be resumed later via "Resume saved test" on the
+  home screen. Only one in-progress session is kept at a time.
+- On a shared device/browser, one student's saved session (name, history,
+  in-progress test) can be overwritten by the next student's session.
 - Encourage students to use the "Print results" button on the results
   screen to save a record before clearing browser data or handing the
   device to someone else.

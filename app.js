@@ -1,3 +1,10 @@
+/* =========================================================================
+   READYSETPREP — ISEE Practice, All Levels
+   -------------------------------------------------------------------------
+   All app logic lives here. Test content lives in data.js — see the header
+   comment there for how to add a new test. Nothing in this file should
+   need to change just because a test was added.
+   ========================================================================= */
 
 /* ---------------- Flatten helpers ---------------- */
 function isEssaySection(sec){ return !!sec.prompt && !sec.questions && !sec.passages; }
@@ -25,12 +32,9 @@ function pctOf(correct, total){ return total ? Math.round((correct/total)*100) :
 /* NOTE: This is a PRACTICE ESTIMATE, not an official ERB stanine. Real ISEE
    stanines are norm-referenced by grade and calculated from scaled scores
    using ERB's national test-taking population — data this site has no
-   access to. This function maps raw percent-correct on this practice
-   workbook onto a transparent 9-band scale (shown to the user in full in
-   the results screen) purely to track practice trends over time. Always
-   labeled "practice stanine estimate" in the UI, and only shown after a
-   FULL test is completed — not after single-section practice, where a
-   percentage alone is a more honest signal. */
+   access to. Bands are shown in full in the results screen. Only shown
+   after a FULL test is completed — a single section isn't a large enough
+   sample for even a rough estimate. */
 const STANINE_BANDS = [
   { min:96, max:100, stanine:9 },
   { min:90, max:95,  stanine:8 },
@@ -48,11 +52,9 @@ function stanineFromPercent(pct){
 }
 
 /* ---------------- Persistent storage ----------------
-   Uses the browser's own localStorage, since this site is meant to be
-   hosted and visited directly (e.g. GitHub Pages) rather than only
-   previewed inside Claude. Progress is saved per-browser/per-device only —
-   there's no account system or central server. Wrapped in try/catch since
-   some browsers restrict storage in private/incognito modes. */
+   Uses the browser's own localStorage — this site is meant to be hosted
+   and visited directly (e.g. GitHub Pages), not just previewed inside
+   Claude. Progress is per-browser/per-device only; no account system. */
 const LS_PREFIX = 'readysetprep:';
 function storageSafeSet(key, value){
   try{ localStorage.setItem(LS_PREFIX+key, JSON.stringify(value)); return true; }catch(e){ return false; }
@@ -71,12 +73,9 @@ const state = {
   screen:'home', studentName:'',
   levelId: 'primary',
   testId: firstTestId('primary'),
-  minutes:{},            // minutes[levelId][testId][sectionId]
-  selectedSections:{},   // selectedSections[levelId][testId][sectionId] = bool
-  mode: 'timed',         // 'timed' | 'untimed'
-  activeSections: [],    // section ids included in the CURRENT attempt, in order
-  sectionIdx:0, qIdx:0, answers:{}, timeRemaining:0, timeElapsed:0, timerId:null,
-  audioPlays:{}, scriptShown:{}, history:[], essayText:''
+  minutes:{}, selectedSections:{}, mode:'timed', activeSections:[],
+  sectionIdx:0, qIdx:0, answers:{}, flags:{}, timeRemaining:0, timeElapsed:0, timerId:null,
+  audioPlays:{}, scriptShown:{}, history:[], essayText:'', inProgress:false
 };
 function ensureMinutesFor(levelId, testId){
   if(!testId) return;
@@ -94,9 +93,7 @@ function ensureSelectedFor(levelId, testId){
   state.selectedSections[levelId] = state.selectedSections[levelId] || {};
   if(state.selectedSections[levelId][testId]) return;
   const s = {};
-  LEVELS[levelId].sectionOrder.forEach(sid=>{
-    if(TESTS[levelId][testId].sections[sid]) s[sid] = true;
-  });
+  LEVELS[levelId].sectionOrder.forEach(sid=>{ if(TESTS[levelId][testId].sections[sid]) s[sid] = true; });
   state.selectedSections[levelId][testId] = s;
 }
 ensureMinutesFor(state.levelId, state.testId);
@@ -114,23 +111,43 @@ function isFullTest(){
 }
 function levelHasTests(levelId){ return Object.keys(TESTS[levelId]).length > 0; }
 
-async function loadSaved(){
-  const name = await storageSafeGet('studentName'); if(name) state.studentName = name;
-  const mins = await storageSafeGet('minutes'); if(mins) state.minutes = mins;
-  const hist = await storageSafeGet('history'); if(hist) state.history = hist;
-  ensureMinutesFor(state.levelId, state.testId);
-  ensureSelectedFor(state.levelId, state.testId);
+const ACTIVE_SCREENS = ['sectionIntro','question','essay','sectionReview'];
+function loadSaved(){
+  const name = storageSafeGet('studentName'); if(name) state.studentName = name;
+  const mins = storageSafeGet('minutes'); if(mins) state.minutes = mins;
+  const hist = storageSafeGet('history'); if(hist) state.history = hist;
   render();
 }
+
+/* Session autosave/resume — lets someone close the tab mid-test and pick
+   back up later, similar to the reference site. */
+function saveSession(){
+  if(!ACTIVE_SCREENS.includes(state.screen)) return;
+  storageSafeSet('session', {
+    screen: state.screen, levelId: state.levelId, testId: state.testId, mode: state.mode,
+    activeSections: state.activeSections, sectionIdx: state.sectionIdx, qIdx: state.qIdx,
+    answers: state.answers, flags: state.flags, timeRemaining: state.timeRemaining,
+    timeElapsed: state.timeElapsed, audioPlays: state.audioPlays, essayText: state.essayText,
+    studentName: state.studentName, savedAt: new Date().toISOString()
+  });
+}
+function loadSessionPreview(){ return storageSafeGet('session'); }
+function resumeSession(){
+  const s = loadSessionPreview(); if(!s) return;
+  Object.assign(state, s);
+  ensureMinutesFor(state.levelId, state.testId);
+  ensureSelectedFor(state.levelId, state.testId);
+  if(state.screen==='question' || state.screen==='essay'){ startTimer(); }
+  render();
+}
+function clearSession(){ storageSafeRemove('session'); goHome(); }
 
 /* ---------------- Navigation / flow ---------------- */
 function goHome(){ stopTimer(); state.screen='home'; render(); }
 function goSettings(){ state.screen='settings'; render(); }
 function chooseLevel(levelId){
-  state.levelId = levelId;
-  state.testId = firstTestId(levelId);
-  ensureMinutesFor(state.levelId, state.testId);
-  ensureSelectedFor(state.levelId, state.testId);
+  state.levelId = levelId; state.testId = firstTestId(levelId);
+  ensureMinutesFor(state.levelId, state.testId); ensureSelectedFor(state.levelId, state.testId);
   render();
 }
 function chooseTest(testId){ state.testId = testId; ensureMinutesFor(state.levelId, state.testId); ensureSelectedFor(state.levelId, state.testId); render(); }
@@ -138,35 +155,30 @@ function setMode(m){ state.mode = m; render(); }
 function toggleSectionSelected(secId){
   const sel = currentSelected();
   const onCount = Object.values(sel).filter(Boolean).length;
-  if(sel[secId] && onCount<=1) return; // keep at least one section selected
-  sel[secId] = !sel[secId];
-  render();
+  if(sel[secId] && onCount<=1) return;
+  sel[secId] = !sel[secId]; render();
 }
-function selectAllSections(){
-  const sel = currentSelected();
-  sectionOrder().forEach(id=> sel[id]=true);
-  render();
-}
+function selectAllSections(){ const sel = currentSelected(); sectionOrder().forEach(id=> sel[id]=true); render(); }
 
 function startPractice(){
   if(!state.testId) return;
   state.activeSections = sectionOrder().filter(id => currentSelected()[id]);
   if(state.activeSections.length===0) return;
-  state.sectionIdx=0; state.answers={}; state.audioPlays={}; state.scriptShown={}; state.essayText='';
+  state.sectionIdx=0; state.answers={}; state.flags={}; state.audioPlays={}; state.scriptShown={}; state.essayText='';
   enterSectionIntro(0);
 }
 function retakeSameSession(){
-  state.sectionIdx=0; state.answers={}; state.audioPlays={}; state.scriptShown={}; state.essayText='';
+  state.sectionIdx=0; state.answers={}; state.flags={}; state.audioPlays={}; state.scriptShown={}; state.essayText='';
   enterSectionIntro(0);
 }
-function enterSectionIntro(idx){ state.sectionIdx=idx; state.screen='sectionIntro'; render(); }
+function enterSectionIntro(idx){ state.sectionIdx=idx; state.screen='sectionIntro'; saveSession(); render(); }
 function beginSection(){
   const secId = state.activeSections[state.sectionIdx];
   const sec = currentTest().sections[secId];
   state.qIdx=0; state.essayText='';
   if(state.mode==='timed'){ state.timeRemaining = currentMinutes()[secId]*60; } else { state.timeElapsed = 0; }
   state.screen = isEssaySection(sec) ? 'essay' : 'question';
-  startTimer(); render();
+  startTimer(); saveSession(); render();
 }
 function startTimer(){
   stopTimer();
@@ -174,30 +186,42 @@ function startTimer(){
     if(state.mode==='timed'){
       state.timeRemaining--; updateTimerBadge();
       if(state.timeRemaining<=0){ stopTimer(); finishSection(); }
-    } else {
-      state.timeElapsed++; updateTimerBadge();
-    }
+    } else { state.timeElapsed++; updateTimerBadge(); }
+    saveSession();
   },1000);
 }
 function stopTimer(){ if(state.timerId){ clearInterval(state.timerId); state.timerId=null; } }
 function currentSectionFlat(){ return currentFlat()[state.activeSections[state.sectionIdx]]; }
-function selectChoice(choiceIdx){ const q = currentSectionFlat()[state.qIdx]; state.answers[q.id]=choiceIdx; render(); }
-function nextQuestion(){ const flat=currentSectionFlat(); if(state.qIdx<flat.length-1){ state.qIdx++; render(); } else { stopTimer(); finishSection(); } }
-function prevQuestion(){ if(state.qIdx>0){ state.qIdx--; render(); } }
+function selectChoice(choiceIdx){ const q = currentSectionFlat()[state.qIdx]; state.answers[q.id]=choiceIdx; saveSession(); render(); }
+function toggleFlag(){ const q = currentSectionFlat()[state.qIdx]; state.flags[q.id] = !state.flags[q.id]; saveSession(); render(); }
+function jumpToQuestion(idx){ state.qIdx = idx; state.screen='question'; saveSession(); render(); }
+function nextQuestion(){
+  const flat=currentSectionFlat();
+  if(state.qIdx<flat.length-1){ state.qIdx++; saveSession(); render(); }
+  else { state.screen='sectionReview'; saveSession(); render(); }
+}
+function prevQuestion(){ if(state.qIdx>0){ state.qIdx--; saveSession(); render(); } }
+function returnToQuestions(){ state.screen='question'; saveSession(); render(); }
+function submitSection(){
+  const flat = currentSectionFlat();
+  const missing = flat.filter(q=> state.answers[q.id]===undefined);
+  if(missing.length && !confirm(`There are ${missing.length} unanswered question${missing.length===1?'':'s'}. Submit this section anyway?`)) return;
+  stopTimer(); finishSection();
+}
 function finishEssay(){ stopTimer(); finishSection(); }
-function finishSection(){ state.screen='sectionBreak'; render(); }
+function finishSection(){ state.screen='sectionBreak'; saveSession(); render(); }
 function nextSectionOrResults(){ if(state.sectionIdx<state.activeSections.length-1){ enterSectionIntro(state.sectionIdx+1); } else { finishExpedition(); } }
-async function finishExpedition(){
+function finishExpedition(){
   const summary = computeSummary();
   state.history.unshift({
-    date:new Date().toISOString(), name: state.studentName||'Explorer',
+    date:new Date().toISOString(), name: state.studentName||'Student',
     levelLabel: currentLevel().label, testLabel: currentTest().label,
     mode: state.mode, sections: state.activeSections.map(id=>currentTest().sections[id].shortName),
-    isFull: isFullTest(),
-    ...summary
+    isFull: isFullTest(), ...summary
   });
   state.history = state.history.slice(0,15);
   storageSafeSet('history', state.history);
+  storageSafeRemove('session');
   state.screen='results'; render();
 }
 function computeSummary(){
@@ -206,8 +230,7 @@ function computeSummary(){
     const sec = currentTest().sections[id];
     if(isEssaySection(sec)){
       const words = state.essayText.trim() ? state.essayText.trim().split(/\s+/).length : 0;
-      perSection[id] = { isEssay:true, words };
-      return;
+      perSection[id] = { isEssay:true, words }; return;
     }
     const flat=currentFlat()[id]; let correct=0;
     flat.forEach(q=>{ if(state.answers[q.id]===q.correct) correct++; });
@@ -226,21 +249,35 @@ function playPassage(passageId, text){
     utter.rate=0.92; utter.pitch=1.05;
     window.speechSynthesis.speak(utter);
   }
-  render();
+  saveSession(); render();
 }
 function toggleScript(passageId){ state.scriptShown[passageId] = !state.scriptShown[passageId]; render(); }
 function updateSetting(section, minutes){ currentMinutes()[section]=Math.max(1, Math.min(90, parseInt(minutes)||1)); }
-async function saveSettingsAndHome(){ await storageSafeSet('minutes', state.minutes); await storageSafeSet('studentName', state.studentName); goHome(); }
+function saveSettingsAndHome(){ storageSafeSet('minutes', state.minutes); storageSafeSet('studentName', state.studentName); goHome(); }
 function fmtTime(sec){ const m=Math.floor(sec/60), s=sec%60; return `${m}:${s.toString().padStart(2,'0')}`; }
 function updateTimerBadge(){
   const el=document.getElementById('timerBadge'); if(!el) return;
-  el.classList.remove('warn','danger');
-  if(state.mode==='timed'){
-    el.textContent=fmtTime(Math.max(0,state.timeRemaining));
-    if(state.timeRemaining<=15) el.classList.add('danger'); else if(state.timeRemaining<=60) el.classList.add('warn');
-  } else {
-    el.textContent=fmtTime(state.timeElapsed)+' elapsed';
-  }
+  el.classList.remove('warn');
+  if(state.mode==='timed'){ el.textContent=fmtTime(Math.max(0,state.timeRemaining)); if(state.timeRemaining<=60) el.classList.add('warn'); }
+  else { el.textContent=fmtTime(state.timeElapsed)+' elapsed'; }
+}
+
+/* ---------------- Small visual helpers ---------------- */
+const TOOL_ICONS = { 'ruler':'📏','scale':'⚖️','thermometer':'🌡️','clock':'🕒','measuring cup':'🥤','measuring tape':'📐' };
+function toolIconFor(text){ const key = text.trim().toLowerCase(); return TOOL_ICONS[key] || null; }
+
+/* Arrow shapes reused for triangle-direction choices (missing puzzle piece,
+   reflection questions) — an asymmetric arrow makes "which way does this
+   point" much clearer than a plain triangle. */
+const ARROW_PATHS = {
+  right: 'M12 20 H50 V8 L78 30 L50 52 V40 H12 Z',
+  left:  'M78 20 H40 V8 L12 30 L40 52 V40 H78 Z',
+  up:    'M35 52 V30 H20 L45 7 L70 30 H55 V52 Z',
+  down:  'M35 8 V30 H20 L45 53 L70 30 H55 V8 Z',
+};
+function arrowSVG(direction, w, h){
+  w = w||74; h = h||50;
+  return `<svg viewBox="0 0 90 60" width="${w}" height="${h}"><path d="${ARROW_PATHS[direction]}" fill="#d9e3f6" stroke="#344054" stroke-width="3"/></svg>`;
 }
 
 /* ---------------- Figure rendering ---------------- */
@@ -248,110 +285,99 @@ function renderFigure(fig){
   if(!fig) return '';
   let inner='';
   if(fig.type==='table'){
-    inner = `<table class="fig-table"><tr>${fig.headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr><tr>${fig.values.map(v=>`<td>${v}</td>`).join('')}</tr></table>`;
+    inner = `<div class="mini-table"><table><tr>${fig.headers.map(h=>`<th>${esc(h)}</th>`).join('')}</tr><tr>${fig.values.map(v=>`<td>${v}</td>`).join('')}</tr></table></div>`;
   } else if(fig.type==='grid'){
-    inner = `<table class="fig-table">${fig.rows.map(r=>`<tr>${r.map(c=>`<td class="${c==='?'?'qmark':''}">${c}</td>`).join('')}</tr>`).join('')}</table>`;
+    inner = `<div class="number-grid">${fig.rows.flat().map(c=>`<span class="${c==='?'?'mystery':''}">${c}</span>`).join('')}</div>`;
   } else if(fig.type==='bars'){
     const maxV = Math.max(...fig.values);
-    inner = `<div class="bars-wrap">${fig.labels.map((l,i)=>`
-      <div class="bar-col">
-        <div class="bar-val">${fig.values[i]}</div>
-        <div class="bar" style="height:${(fig.values[i]/maxV)*90+10}px;"></div>
-        <div class="bar-label">${esc(l)}</div>
-      </div>`).join('')}</div>`;
+    inner = `<div class="bar-chart" aria-label="Bar chart">${fig.labels.map((l,i)=>`
+      <div class="bar-col"><div class="bar" style="height:${Math.round((fig.values[i]/maxV)*80+10)}%"><b>${fig.values[i]}</b></div><span>${esc(l)}</span></div>`).join('')}</div>`;
   } else if(fig.type==='baseten'){
-    inner = `<div class="baseten-wrap">
-      <div class="baseten-group">${Array(fig.hundreds).fill('<div class="bt-flat"></div>').join('')}</div>
-      <div class="baseten-group">${Array(fig.tens).fill('<div class="bt-rod"></div>').join('')}</div>
-      <div class="baseten-group">${Array(fig.ones).fill('<div class="bt-cube"></div>').join('')}</div>
+    inner = `<div class="base-ten" aria-label="${fig.hundreds} hundreds, ${fig.tens} tens, ${fig.ones} ones">
+      <div class="hundreds">${Array(fig.hundreds).fill('<span class="hundred"></span>').join('')}</div>
+      <div class="tens">${Array(fig.tens).fill('<span class="ten"></span>').join('')}</div>
+      <div class="ones">${Array(fig.ones).fill('<span class="one"></span>').join('')}</div>
     </div>`;
   } else if(fig.type==='conecyl'){
-    inner = `<div class="cone-cyl"><svg width="180" height="90" viewBox="0 0 180 90">
-      <ellipse cx="35" cy="72" rx="25" ry="7" fill="none" stroke="var(--fern)" stroke-width="2.5"/>
-      <polygon points="35,10 10,72 60,72" fill="var(--fern-light)" stroke="var(--fern)" stroke-width="2.5"/>
-      <rect x="100" y="18" width="50" height="54" fill="var(--fern-light)" stroke="var(--fern)" stroke-width="2.5"/>
-      <ellipse cx="125" cy="18" rx="25" ry="7" fill="var(--fern-light)" stroke="var(--fern)" stroke-width="2.5"/>
-      <ellipse cx="125" cy="72" rx="25" ry="7" fill="none" stroke="var(--fern)" stroke-width="2.5"/>
+    inner = `<div class="svg-wrap"><svg viewBox="0 0 320 160" role="img" aria-label="A cone and a cylinder">
+      <ellipse cx="75" cy="120" rx="50" ry="16" fill="#e8eef8" stroke="#344054" stroke-width="3"/>
+      <path d="M25 120 L75 28 L125 120" fill="#f6f8fc" stroke="#344054" stroke-width="3"/>
+      <text x="75" y="151" text-anchor="middle">cone</text>
+      <ellipse cx="235" cy="42" rx="45" ry="15" fill="#e8eef8" stroke="#344054" stroke-width="3"/>
+      <path d="M190 42 V118 M280 42 V118" stroke="#344054" stroke-width="3"/>
+      <ellipse cx="235" cy="118" rx="45" ry="15" fill="#f6f8fc" stroke="#344054" stroke-width="3"/>
+      <text x="235" y="151" text-anchor="middle">cylinder</text>
     </svg></div>`;
   } else if(fig.type==='dotgroups'){
-    inner = `<div class="dotgroups-wrap">${fig.groups.map(g=>`
-      <div class="dotgroup"><div class="letter">Group ${g.label}</div>
-      <div class="dots">${Array(g.count).fill('🍒').join(' ')}</div></div>`).join('')}</div>`;
+    inner = fig.groups.map(g=>`<div style="margin-bottom:10px;"><b style="font-size:13px;">Group ${g.label}</b>
+      <div class="cherry-row">${Array(g.count).fill('<span class="single-cherry"></span>').join('')}<small style="width:100%;color:var(--muted);">${g.count} cherries</small></div></div>`).join('');
   } else if(fig.type==='marbles'){
     const arr=[]; for(let i=0;i<fig.green;i++) arr.push('g'); for(let i=0;i<fig.red;i++) arr.push('r');
-    inner = `<div class="marbles-wrap">${arr.map(c=>`<div class="marble ${c}"></div>`).join('')}</div>`;
+    inner = `<div class="marble-bag"><div class="bag-label">Bag of marbles</div><div class="marbles">${arr.map(c=>`<span class="${c==='g'?'green':'red'}"></span>`).join('')}</div></div>`;
   } else if(fig.type==='ruler'){
-    const scale = 280/fig.max;
-    const ticks = [];
-    for(let i=0;i<=fig.max;i++){ ticks.push(`<line x1="${20+i*scale}" y1="24" x2="${20+i*scale}" y2="32" stroke="var(--ink-soft)" stroke-width="1.5"/><text x="${20+i*scale}" y="46" font-size="10" text-anchor="middle" fill="var(--ink-soft)">${i}</text>`); }
-    inner = `<svg width="320" height="55" viewBox="0 0 320 55">
-      <line x1="20" y1="28" x2="${20+fig.max*scale}" y2="28" stroke="var(--ink-soft)" stroke-width="1.5"/>
-      ${ticks.join('')}
-      <line x1="${20+fig.start*scale}" y1="16" x2="${20+fig.end*scale}" y2="16" stroke="var(--coral)" stroke-width="5" stroke-linecap="round"/>
-    </svg>`;
+    const pct = v => Math.round((v/fig.max)*100);
+    inner = `<div class="ruler-wrap">
+      <div class="pencil-line" style="margin-left:${pct(fig.start)}%; width:${pct(fig.end-fig.start)}%;"></div>
+      <div class="ticks" style="grid-template-columns:repeat(${fig.max+1},1fr);">
+        ${Array.from({length:fig.max+1}).map((_,i)=>`<div class="tick"><i></i><b>${i}</b></div>`).join('')}
+      </div>
+    </div>`;
   } else if(fig.type==='puzzlesquare'){
-    inner = `<svg width="130" height="130" viewBox="0 0 120 120">
-      <polygon points="0,0 120,0 60,60" fill="var(--fern-light)" stroke="var(--fern)" stroke-width="2"/>
-      <polygon points="0,120 120,120 60,60" fill="var(--fern-light)" stroke="var(--fern)" stroke-width="2"/>
-      <polygon points="0,0 0,120 60,60" fill="var(--fern-light)" stroke="var(--fern)" stroke-width="2"/>
-      <polygon points="120,0 120,120 60,60" fill="none" stroke="var(--coral)" stroke-width="2.5" stroke-dasharray="5,4"/>
-      <text x="92" y="65" font-size="20" text-anchor="middle" fill="var(--coral-deep)" font-weight="bold">?</text>
-    </svg>`;
+    inner = `<div class="svg-wrap"><svg viewBox="0 0 260 190" role="img" aria-label="A square puzzle with a triangular piece missing">
+      <rect x="35" y="15" width="160" height="160" fill="white" stroke="#344054" stroke-width="4"/>
+      <path d="M35 15 L195 15 L115 95 Z" fill="#cddaf2" stroke="#344054" stroke-width="2"/>
+      <path d="M35 15 L115 95 L35 175 Z" fill="#e7edf8" stroke="#344054" stroke-width="2"/>
+      <path d="M35 175 L115 95 L195 175 Z" fill="#b8c9e8" stroke="#344054" stroke-width="2"/>
+      <path d="M195 15 L195 175 L115 95 Z" fill="white" stroke="#d92d20" stroke-width="3" stroke-dasharray="7 5"/>
+      <text x="215" y="98" font-size="14" fill="#d92d20">missing</text>
+    </svg></div>`;
   } else if(fig.type==='reflect-v'){
-    inner = `<div style="display:flex; align-items:center; justify-content:center; gap:0;">
-      <div class="tri-frame">${triangleHTML('right',48,'var(--fern)')}</div>
-      <div style="width:2px; height:70px; background:repeating-linear-gradient(to bottom, var(--coral) 0 6px, transparent 6px 12px); margin:0 14px;"></div>
-      <div class="tri-frame" style="border:2px dashed var(--sky-deep); background:transparent;"><span style="font-size:22px; color:var(--ink-soft);">?</span></div>
-    </div>`;
+    inner = `<div class="svg-wrap"><svg viewBox="0 0 420 180" role="img" aria-label="A shape to the left of a vertical fold line">
+      <line x1="210" y1="10" x2="210" y2="170" stroke="#667085" stroke-width="3" stroke-dasharray="7 7"/>
+      <path d="M55 58 H120 V35 L175 90 L120 145 V122 H55 Z" fill="#bfd0ee" stroke="#344054" stroke-width="3"/>
+      <text x="95" y="165" font-size="14">original</text>
+      <text x="222" y="25" font-size="13">flip across this line</text>
+    </svg></div>`;
   } else if(fig.type==='reflect-h'){
-    inner = `<div style="display:flex; flex-direction:column; align-items:center; gap:0;">
-      <div class="tri-frame">${triangleHTML('up',48,'var(--fern)')}</div>
-      <div style="height:2px; width:70px; background:repeating-linear-gradient(to right, var(--coral) 0 6px, transparent 6px 12px); margin:14px 0;"></div>
-      <div class="tri-frame" style="border:2px dashed var(--sky-deep); background:transparent;"><span style="font-size:22px; color:var(--ink-soft);">?</span></div>
-    </div>`;
+    inner = `<div class="svg-wrap"><svg viewBox="0 0 420 190" role="img" aria-label="Top half of a design above a horizontal fold line">
+      <line x1="20" y1="105" x2="400" y2="105" stroke="#667085" stroke-width="3" stroke-dasharray="7 7"/>
+      <path d="M120 95 Q145 35 170 95 Q195 35 220 95 Q245 35 270 95" fill="none" stroke="#344054" stroke-width="6"/>
+      <circle cx="155" cy="63" r="6" fill="#344054"/><circle cx="235" cy="63" r="6" fill="#344054"/>
+      <text x="25" y="96" font-size="14">top half</text>
+    </svg></div>`;
   }
-  const centered = (fig.type==='puzzlesquare' || fig.type==='conecyl');
-  return `<div class="figure-box"><div style="${centered?'display:flex;justify-content:center;':''}">${inner}</div></div>`;
-}
-
-function triangleHTML(direction, size, color){
-  size = size||50; color = color||'var(--fern)';
-  const half = size/2;
-  let style = `display:inline-block;width:0;height:0;`;
-  if(direction==='up') style += `border-left:${half}px solid transparent;border-right:${half}px solid transparent;border-bottom:${size}px solid ${color};`;
-  if(direction==='down') style += `border-left:${half}px solid transparent;border-right:${half}px solid transparent;border-top:${size}px solid ${color};`;
-  if(direction==='left') style += `border-top:${half}px solid transparent;border-bottom:${half}px solid transparent;border-right:${size}px solid ${color};`;
-  if(direction==='right') style += `border-top:${half}px solid transparent;border-bottom:${half}px solid transparent;border-left:${size}px solid ${color};`;
-  return `<span style="${style}"></span>`;
+  return `<div class="visual">${inner}</div>`;
 }
 
 /* ---------------- Rendering ---------------- */
 function render(){
   const app=document.getElementById('app');
-  app.innerHTML = header() + body();
+  app.innerHTML = body();
   if(state.screen==='question' || state.screen==='essay') updateTimerBadge();
   window.scrollTo({top:0, behavior:'auto'});
 }
-function header(){
-  return `<div class="topbar">
-    <div class="brand"><div class="brand-mark">🧭</div>
-      <div class="brand-text"><h1>ReadySetPrep</h1><span>ISEE PRACTICE · ALL LEVELS</span></div>
-    </div>
-    ${state.screen==='home' ? `<button class="student-pill" onclick="goSettings()">⚙️ ${state.studentName ? esc(state.studentName) : 'Set up'}</button>` : ''}
-  </div>`;
-}
 function esc(s){ const d=document.createElement('div'); d.innerText=String(s); return d.innerHTML; }
+function topbar(){
+  const secId = state.activeSections[state.sectionIdx];
+  const sec = secId ? currentTest().sections[secId] : null;
+  return `<header class="topbar"><div class="topbar-inner">
+    <div class="brand">ReadySetPrep</div>
+    <div class="section-title">${sec ? esc(sec.name) : ''}</div>
+    <div class="timer ${state.mode==='timed' && state.timeRemaining<=60 ? 'warn':''}" id="timerBadge">${state.screen==='question'||state.screen==='essay' ? (state.mode==='timed'?fmtTime(state.timeRemaining):fmtTime(state.timeElapsed)+' elapsed') : 'Review'}</div>
+  </div></header>`;
+}
 
 function body(){
   switch(state.screen){
     case 'home': return homeScreen();
     case 'settings': return settingsScreen();
-    case 'sectionIntro': return sectionIntroScreen();
-    case 'question': return questionScreen();
-    case 'essay': return essayScreen();
-    case 'sectionBreak': return sectionBreakScreen();
-    case 'results': return resultsScreen();
-    case 'review': return reviewScreen();
+    case 'sectionIntro': return topbar() + `<main class="container">` + sectionIntroScreen() + `</main>`;
+    case 'question': return topbar() + `<main class="container">` + questionScreen() + `</main>`;
+    case 'essay': return topbar() + `<main class="container">` + essayScreen() + `</main>`;
+    case 'sectionReview': return topbar() + `<main class="container">` + sectionReviewScreen() + `</main>`;
+    case 'sectionBreak': return `<main class="container">` + sectionBreakScreen() + `</main>`;
+    case 'results': return `<main class="container">` + resultsScreen() + `</main>`;
+    case 'review': return `<main class="container">` + reviewScreen() + `</main>`;
     default: return '';
   }
 }
@@ -362,136 +388,107 @@ function homeScreen(){
   const flat = currentFlat();
   const mins = currentMinutes();
   const sel = currentSelected();
+  const savedSession = loadSessionPreview();
 
-  let heroHtml;
-  if(test){
-    const included = sectionOrder().filter(id=>sel[id]);
-    const totalMin = included.reduce((a,id)=> a + (mins[id]||0), 0);
-    const totalQ = included.reduce((a,id)=>{ const f=flat[id]; return a + (f ? f.length : 0); }, 0);
-    const isFull = included.length === sectionOrder().length;
-    heroHtml = `
-    <div class="hero">
-      <h2>${state.studentName ? esc(state.studentName)+"'s" : 'Ready for an'} expedition?</h2>
-      <p>${esc(level.label)} Level · ${esc(test.label)} — ${isFull ? 'full test' : included.map(id=>test.sections[id].shortName).join(' + ')}, ${totalQ} scored questions${state.mode==='timed' ? `, about ${totalMin} minutes` : ', untimed'}.</p>
+  return `<main class="container"><section class="card hero">
+    <span class="badge">Interactive browser practice</span>
+    <h1>ReadySetPrep — ISEE Practice</h1>
+    <p>Choose a level, pick timed or untimed, then take a full test or practice just the sections you want. You can jump between questions, flag anything for review, and check your work in a review screen before submitting each section.</p>
 
-      <div class="mode-toggle">
-        <button class="mode-btn ${state.mode==='timed'?'active':''}" onclick="setMode('timed')">⏱ Timed<span class="sub">Official ISEE time limits</span></button>
-        <button class="mode-btn ${state.mode==='untimed'?'active':''}" onclick="setMode('untimed')">✏️ Untimed<span class="sub">No pressure — practice at your own pace</span></button>
-      </div>
-
-      <div class="log-title" style="color:rgba(255,255,255,0.85);">Which sections?</div>
-      <div class="section-chips">
-        ${sectionOrder().map(id=>`<button class="chip ${sel[id]?'active':''}" onclick="toggleSectionSelected('${id}')">${test.sections[id].icon} ${test.sections[id].shortName}</button>`).join('')}
-        <button class="chip-select-all" onclick="selectAllSections()">Select all</button>
-      </div>
-
-      <div class="trailmap">
-        ${sectionOrder().map((id,i)=>{
-          const sec = test.sections[id];
-          const f = flat[id];
-          return `<div class="waypoint" style="${sel[id]?'':'opacity:0.4;'}"><div class="dot">${sec.icon}</div><div class="label">${sec.shortName}</div><div class="sub">${mins[id]} min${f?` · ${f.length}q`:''}</div></div>
-          ${i<sectionOrder().length-1?'<div class="trail-line"></div>':''}`;
-        }).join('')}
-      </div>
-      <button class="btn btn-primary btn-lg" onclick="startPractice()">${isFull ? "Start today's expedition" : 'Start selected sections'} →</button>
-    </div>`;
-  } else {
-    heroHtml = `
-    <div class="hero">
-      <h2>${esc(level.label)} Level</h2>
-      <p>${esc(level.subtitle)} — no practice tests loaded yet for this level.</p>
-      <div class="empty-state" style="color:var(--paper);">
-        <div class="icon">🗺️</div>
-        <p style="color:rgba(255,255,255,0.85);">Send over a ${esc(level.label)} Level workbook in the same pattern as the Primary test, and it'll show up here as a new expedition. Expected sections: ${level.sectionOrder.map(id=>sectionLabelGuess(id)).join(', ')}.</p>
-      </div>
-    </div>`;
-  }
-
-  return `
-  ${heroHtml}
-
-  <div class="card">
-    <div class="log-title">Choose a level</div>
+    <div class="log-title" style="font-weight:800; margin:20px 0 8px;">Choose a level</div>
     <div class="level-picker">
       ${LEVEL_IDS.map(lid=>{
         const l = LEVELS[lid]; const active = lid===state.levelId; const has = levelHasTests(lid);
         return `<div class="level-card ${active?'active':''}" onclick="chooseLevel('${lid}')">
           <div class="icon">${l.icon}</div><h4>${esc(l.label)}</h4><p>${esc(l.subtitle)}</p>
-          <p style="margin-top:4px; ${has?'color:var(--fern-deep);font-weight:700;':''}">${has ? Object.keys(TESTS[lid]).length+' test'+(Object.keys(TESTS[lid]).length>1?'s':'') : 'No tests yet'}</p>
+          <p style="margin-top:4px; ${has?'color:var(--ok);font-weight:700;':''}">${has ? Object.keys(TESTS[lid]).length+' test'+(Object.keys(TESTS[lid]).length>1?'s':'') : 'No tests yet'}</p>
         </div>`;
       }).join('')}
     </div>
-  </div>
 
-  ${levelHasTests(state.levelId) ? `
-  <div class="card">
-    <div class="log-title">${esc(level.label)} Level practice tests</div>
-    <div class="test-picker">
+    ${test ? `
+    ${levelHasTests(state.levelId) && Object.keys(TESTS[state.levelId]).length>1 ? `
+    <div class="log-title" style="font-weight:800; margin:20px 0 8px;">Choose a test</div>
+    <div class="mode-grid">
       ${Object.keys(TESTS[state.levelId]).map(tid=>{
-        const tt = TESTS[state.levelId][tid]; const f = FLAT_BY_TEST[state.levelId][tid];
-        const q = LEVELS[state.levelId].sectionOrder.filter(id=>tt.sections[id]).reduce((a,id)=> a + (f[id] ? f[id].length : 0), 0);
-        const active = tid===state.testId;
-        return `<div class="test-card ${active?'active':''}">
-          <div><h4>${esc(tt.label)}</h4><p>${q} scored questions${LEVELS[state.levelId].sectionOrder.some(id=>tt.sections[id] && isEssaySection(tt.sections[id]))?' + essay':''} · can be retaken any time</p></div>
-          ${active ? `<span class="test-card-badge">Selected</span>` : `<button class="btn btn-ghost btn-sm" onclick="chooseTest('${tid}')">Select</button>`}
-        </div>`;
+        const tt = TESTS[state.levelId][tid]; const active = tid===state.testId;
+        return `<div class="mode-card ${active?'selected':''}" onclick="chooseTest('${tid}')"><h3>${esc(tt.label)}</h3><p>Tap to select</p></div>`;
       }).join('')}
-    </div>
-  </div>` : ''}
+    </div>` : ''}
 
-  <div class="card">
-    <div class="log-title">Past expeditions</div>
-    ${state.history.length===0 ? `<div class="empty-log">No expeditions yet — your first one will show up here as a journal stamp.</div>` :
-      state.history.map(h=>`<div class="log-entry"><span>${new Date(h.date).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})} — ${esc(h.name)} · ${esc(h.levelLabel||'')} ${esc(h.testLabel||'')} · <span class="mode-pill">${h.mode||'timed'}</span>${!h.isFull && h.totalQ ? ' <span class="mode-pill">section</span>' : ''}</span><span class="stamp">${h.totalQ ? h.overallPct+'%' : ''} ${h.totalQ && h.isFull ? '<span class="stanine-badge" title="Practice stanine estimate — full test only">'+h.overallStanine+'</span>' : ''}</span></div>`).join('')}
-  </div>
-  ${state.levelId==='primary' && test ? `<div class="callout">📌 A heads-up: 4 math questions in Test #2 (the cherry-sharing group, the missing puzzle piece, and the two reflection/symmetry questions) use original diagrams rebuilt to match the workbook's answer key, since their source images weren't available as text. Worth double-checking those four against the printed workbook.</div>` : ''}
+    <div class="log-title" style="font-weight:800; margin:20px 0 8px;">Choose how to practice</div>
+    <div class="mode-grid">
+      <div class="mode-card ${state.mode==='timed'?'selected':''}" onclick="setMode('timed')"><span class="badge">Realistic practice</span><h3>Timed</h3><p>Uses the official ISEE section time limits.</p></div>
+      <div class="mode-card ${state.mode==='untimed'?'selected':''}" onclick="setMode('untimed')"><span class="badge">No clock</span><h3>Untimed</h3><p>Practice at your own pace, no pressure.</p></div>
+    </div>
+
+    <div class="log-title" style="font-weight:800; margin:20px 0 8px;">Which sections?</div>
+    <div class="mode-grid" style="grid-template-columns:repeat(auto-fit,minmax(150px,1fr));">
+      ${sectionOrder().map(id=>`<div class="mode-card ${sel[id]?'selected':''}" style="padding:14px;" onclick="toggleSectionSelected('${id}')"><h3 style="font-size:15px;">${test.sections[id].icon} ${test.sections[id].shortName}</h3><p>${mins[id]} min${flat[id]?` · ${flat[id].length}q`:''}</p></div>`).join('')}
+    </div>
+    <button class="btn btn-ghost btn-sm" onclick="selectAllSections()">Select all sections</button>
+
+    <div class="input-row"><label for="studentName">Student name</label><input id="studentName" value="${esc(state.studentName)}" oninput="state.studentName=this.value" placeholder="e.g. Aashvi"></div>
+
+    <div class="action-row">
+      <button class="btn btn-primary" onclick="startPractice()">Start${isSelectedFull(sel)?' full test':' selected sections'} →</button>
+      ${savedSession ? `<button class="btn btn-secondary" onclick="resumeSession()">Resume saved test</button><button class="btn btn-danger" onclick="if(confirm('Clear the saved test and its answers?')) clearSession();">Clear saved test</button>` : ''}
+    </div>
+    <p class="footer-note">Works best in Chrome. Progress and audio use this device's browser only — see the privacy notice below.</p>
+    ` : `
+    <div class="empty-state">
+      <div class="icon">🗂️</div>
+      <p>No practice tests loaded yet for ${esc(level.label)} Level. Send over a workbook in the same pattern as the Primary test and it'll show up here.</p>
+    </div>`}
+  </section>
+
+  <section class="card" style="margin-top:18px;">
+    <div class="log-title" style="font-weight:800; margin-bottom:8px;">Past attempts</div>
+    ${state.history.length===0 ? `<div class="empty-log">No attempts yet — your first one will show up here.</div>` :
+      state.history.map(h=>`<div class="log-entry"><span>${new Date(h.date).toLocaleDateString(undefined,{month:'short',day:'numeric',year:'numeric'})} — ${esc(h.name)} · ${esc(h.levelLabel||'')} ${esc(h.testLabel||'')} · <span class="badge">${h.mode||'timed'}</span>${!h.isFull && h.totalQ ? ' <span class="badge">section</span>' : ''}</span><span class="log-stamp">${h.totalQ ? h.overallPct+'%' : ''} ${h.totalQ && h.isFull ? ' · stanine '+h.overallStanine : ''}</span></div>`).join('')}
+  </section>
+  ${state.levelId==='primary' && test ? `<div class="note" style="margin-top:18px;">📌 A heads-up: 4 math questions in Test #2 (the cherry-sharing group, the missing puzzle piece, and the two reflection/symmetry questions) use original diagrams rebuilt to match the workbook's answer key, since their source images weren't available as text. Worth double-checking those four against the printed workbook.</div>` : ''}
   <div class="footer-links"><a href="privacy.html">Privacy notice</a></div>
-  `;
+  </main>`;
 }
-function sectionLabelGuess(id){
-  const names = { auditory:'Auditory Comprehension', reading: (state.levelId==='primary') ? 'Reading' : 'Reading Comprehension', math:'Mathematics', verbal:'Verbal Reasoning', quantitative:'Quantitative Reasoning', mathAch:'Mathematics Achievement', essay:'Essay' };
-  return names[id] || id;
-}
+function isSelectedFull(sel){ return sectionOrder().every(id=>sel[id]); }
 
 function settingsScreen(){
-  const test = currentTest();
-  const mins = currentMinutes();
-  const level = currentLevel();
-  if(!test){
-    return `<div class="card">
-      <h2 style="margin-bottom:16px;">Parent setup</h2>
-      <div class="settings-row"><div><label>Explorer's name</label><span class="hint">Shown on the trailhead and score log</span></div>
-        <input class="text-input" style="width:160px;" value="${esc(state.studentName)}" oninput="state.studentName=this.value" placeholder="e.g. Aashvi"></div>
-      <p class="hint" style="margin-top:14px;">No ${esc(level.label)} Level test is loaded yet, so there's nothing to time here. Add a test, then time limits will show up in this screen.</p>
-      <div class="nav-row"><button class="btn btn-ghost" onclick="goHome()">Cancel</button><button class="btn btn-primary" onclick="saveSettingsAndHome()">Save</button></div>
-    </div>`;
-  }
-  return `<div class="card">
-    <h2 style="margin-bottom:16px;">Parent setup</h2>
-    <div class="settings-row"><div><label>Explorer's name</label><span class="hint">Shown on the trailhead and score log</span></div>
-      <input class="text-input" style="width:160px;" value="${esc(state.studentName)}" oninput="state.studentName=this.value" placeholder="e.g. Aashvi"></div>
-    <div class="settings-row"><div><label>Time limits for</label><span class="hint">${esc(level.label)} · ${esc(test.label)} — used in Timed mode only</span></div></div>
+  const test = currentTest(); const mins = currentMinutes(); const level = currentLevel();
+  return `<main class="container"><section class="card">
+    <h1 style="font-size:24px;">Settings</h1>
+    <div class="input-row"><label>Student name</label><input value="${esc(state.studentName)}" oninput="state.studentName=this.value" placeholder="e.g. Aashvi"></div>
+    ${test ? `<p class="footer-note">Time limits for ${esc(level.label)} · ${esc(test.label)} — used in Timed mode only.</p>
     ${sectionOrder().map(id=>{
       const sec = test.sections[id];
-      return `<div class="settings-row"><div><label>${sec.name} time limit</label><span class="hint">Official ISEE timing: ${sec.defaultMinutes} minutes</span></div>
-      <input class="num-input" type="number" min="1" max="90" value="${mins[id]}" oninput="updateSetting('${id}', this.value)"> min</div>`;
-    }).join('')}
-    <div class="nav-row"><button class="btn btn-ghost" onclick="goHome()">Cancel</button><button class="btn btn-primary" onclick="saveSettingsAndHome()">Save</button></div>
-  </div>`;
+      return `<div class="input-row"><label style="min-width:200px;">${sec.name}</label><input type="number" min="1" max="90" value="${mins[id]}" style="max-width:90px;" oninput="updateSetting('${id}', this.value)"> min</div>`;
+    }).join('')}` : `<p class="footer-note">No test loaded for ${esc(level.label)} Level yet.</p>`}
+    <div class="action-row"><button class="btn btn-secondary" onclick="goHome()">Cancel</button><button class="btn btn-primary" onclick="saveSettingsAndHome()">Save</button></div>
+  </section></main>`;
 }
 
 function sectionIntroScreen(){
   const secId = state.activeSections[state.sectionIdx]; const sec = currentTest().sections[secId];
-  const mins = currentMinutes();
-  const flat = currentFlat()[secId];
-  return `<div class="card">
-    <div class="intro-icon">${sec.icon}</div>
-    <span class="mode-pill">${state.mode==='timed'?'⏱ Timed':'✏️ Untimed'}</span>
-    <h2>${sec.name}</h2>
-    <p style="color:var(--ink-soft); margin-top:4px;">Section ${state.sectionIdx+1} of ${state.activeSections.length} · ${state.mode==='timed' ? mins[secId]+' minutes' : 'no time limit'}${flat?` · ${flat.length} questions`:' · unscored writing sample'}</p>
-    <ul class="intro-list">${sec.instructions.map(t=>`<li>${t}</li>`).join('')}</ul>
-    <div class="nav-row"><button class="btn btn-ghost" onclick="goHome()">Back to trailhead</button><button class="btn btn-primary btn-lg" onclick="beginSection()">Begin ${sec.shortName} →</button></div>
-  </div>`;
+  const mins = currentMinutes(); const flat = currentFlat()[secId];
+  return `<section class="card section-intro">
+    <span class="badge">${state.activeSections.length<sectionOrder().length ? 'Section practice' : `Section ${state.sectionIdx+1} of ${state.activeSections.length}`}</span>
+    <h1>${sec.name}</h1>
+    <div class="section-list">
+      <div><b>Questions</b><span>${flat ? flat.length : '1 prompt'}</span></div>
+      <div><b>Timing</b><span>${state.mode==='timed' ? mins[secId]+' minutes' : 'Untimed'}</span></div>
+    </div>
+    <div class="note">${sec.instructions.join(' ')}</div>
+    <div class="action-row"><button class="btn btn-primary" onclick="beginSection()">Begin ${sec.shortName}</button><button class="btn btn-secondary" onclick="goHome()">Back to start</button></div>
+  </section>`;
+}
+
+function palette(flat, secId){
+  const answered = flat.filter(q=>state.answers[q.id]!==undefined).length;
+  const pct = Math.round(answered/flat.length*100);
+  return `<b>${answered} of ${flat.length} answered</b>
+    <div class="progress-track" style="margin-top:10px;"><div class="progress-fill" style="width:${pct}%"></div></div>
+    <div class="q-palette">${flat.map((q,i)=>`<button class="q-dot ${state.answers[q.id]!==undefined?'answered':''} ${state.flags[q.id]?'flagged':''} ${i===state.qIdx?'current':''}" onclick="jumpToQuestion(${i})">${i+1}</button>`).join('')}</div>
+    <div class="palette-legend">Green = answered<br>★ = flagged for review</div>`;
 }
 
 function questionScreen(){
@@ -499,6 +496,7 @@ function questionScreen(){
   const flat = currentSectionFlat();
   const q = flat[state.qIdx];
   const selected = state.answers[q.id];
+  const flagged = !!state.flags[q.id];
   const letters = ['A','B','C','D'];
   const secMeta = currentTest().sections[secId];
 
@@ -507,83 +505,93 @@ function questionScreen(){
     if(secId==='auditory'){
       const plays = state.audioPlays[q.passage.id]||0;
       const shown = state.scriptShown[q.passage.id];
-      passageHtml = `<div class="listen-box">
-        <button class="btn btn-primary" ${plays>=2?'disabled':''} onclick="playPassage('${q.passage.id}', \`${q.passage.text.replace(/`/g,"'")}\`)">🔊 ${plays===0?'Play the story':'Play again'}</button>
-        <p class="hint">${plays>=2 ? "You've used both plays for this story." : `Plays remaining: ${2-plays}`}</p>
-        <div class="script-reveal"><button class="btn btn-ghost btn-sm" onclick="toggleScript('${q.passage.id}')">${shown?'Hide':'Or, have an adult read it instead →'}</button></div>
+      passageHtml = `<section class="card audio-panel passage-card">
+        <div class="audio-icon">🔊</div><h2>Listen to the passage</h2>
+        <div class="audio-controls">
+          <button class="btn btn-primary" ${plays>=2?'disabled':''} onclick="playPassage('${q.passage.id}', \`${q.passage.text.replace(/`/g,"'")}\`)">${plays===0?'▶ Play passage':'▶ Play again'}</button>
+        </div>
+        <div class="play-count">${plays>=2 ? "You've used both plays for this story." : `Plays remaining: ${2-plays}`}</div>
+        <div style="margin-top:14px;"><button class="btn btn-secondary btn-sm" onclick="toggleScript('${q.passage.id}')">${shown?'Hide script':'Or, have an adult read it instead'}</button></div>
         ${shown ? `<div class="script-box"><h5>Parent / teacher script — don't let the student read this</h5>${esc(q.passage.text)}</div>` : ''}
-      </div>`;
+      </section>`;
     } else {
-      passageHtml = `<div class="passage-box"><h4>${esc(q.passage.title)}</h4>${esc(q.passage.text).split('\n\n').map(p=>`<p>${p}</p>`).join('')}</div>`;
+      passageHtml = `<section class="card passage-card"><h2>${esc(q.passage.title)}</h2><div class="passage-text">${esc(q.passage.text)}</div></section>`;
     }
   }
 
-  const hasVisiblePassage = !!(q.passage && secId !== 'auditory');
   const figureHtml = q.figure ? renderFigure(q.figure) : '';
-  const approxNote = q.approximated ? `<div class="figure-note flag">⚠️ Recreated diagram — verify against the printed workbook.</div>` : '';
+  const approxNote = q.approximated ? `<div class="note" style="margin-bottom:16px;">⚠️ Recreated diagram — verify against the printed workbook.</div>` : '';
 
   let choicesHtml;
   if(q.choiceRender==='triangle'){
     choicesHtml = q.choices.map((dir,i)=>`
-      <button class="choice-btn triangle-choice ${selected===i?'selected':''}" onclick="selectChoice(${i})">
-        <span class="choice-letter">${letters[i]}</span><span class="tri-frame">${triangleHTML(dir,40)}</span>
-      </button>`).join('');
+      <div class="choice ${selected===i?'selected':''}" onclick="selectChoice(${i})" role="button" tabindex="0">
+        <span class="choice-letter">${letters[i]}</span><div class="choice-content">${arrowSVG(dir)}</div>
+      </div>`).join('');
   } else {
-    choicesHtml = q.choices.map((c,i)=>`
-      <button class="choice-btn ${selected===i?'selected':''}" onclick="selectChoice(${i})">
-        <span class="choice-letter">${letters[i]}</span><span>${esc(c)}</span>
-      </button>`).join('');
+    choicesHtml = q.choices.map((c,i)=>{
+      const icon = toolIconFor(c);
+      return `<div class="choice ${selected===i?'selected':''}" onclick="selectChoice(${i})" role="button" tabindex="0">
+        <span class="choice-letter">${letters[i]}</span><div class="choice-content">${icon ? `<div class="tool-choice"><span>${icon}</span><b>${esc(c)}</b></div>` : esc(c)}</div>
+      </div>`;
+    }).join('');
   }
 
-  const questionAndChoices = `
-      ${figureHtml}${approxNote}
-      <div class="question-prompt">${esc(q.prompt)}</div>
-      <div class="choices">${choicesHtml}</div>`;
-
-  const bodyHtml = hasVisiblePassage
-    ? `<div class="question-split">
-        <div class="q-col"><div class="passage-scroll">${passageHtml}</div></div>
-        <div class="c-col">${questionAndChoices}</div>
-      </div>`
-    : `${passageHtml}
-      <div class="question-split">
-        <div class="q-col"><div class="question-prompt">${esc(q.prompt)}</div>${figureHtml}${approxNote}</div>
-        <div class="c-col"><div class="choices">${choicesHtml}</div></div>
-      </div>`;
-
-  return `
-  <div class="test-topbar">
-    <div class="section-chip">${secMeta.icon} ${secMeta.name} — Q${state.qIdx+1} of ${flat.length}</div>
-    <div class="timer-badge mono ${state.mode==='untimed'?'':''}" id="timerBadge">${state.mode==='timed'?fmtTime(state.timeRemaining):fmtTime(state.timeElapsed)+' elapsed'}</div>
-  </div>
-  <div class="trail-progress">
-    ${flat.map((qq,i)=>`${i>0?'<div class="trail-seg"></div>':''}<div class="trail-dot-wrap"><div class="trail-dot ${i===state.qIdx?'current':(state.answers[qq.id]!==undefined?'answered':'')}"></div></div>`).join('')}
-  </div>
-  <div class="card">
-    ${bodyHtml}
+  const questionCard = `<section class="card question-card">
+    <div class="question-meta"><span>Question ${state.qIdx+1}</span><span>${state.qIdx+1} of ${flat.length}</span></div>
+    <div class="question-prompt">${esc(q.prompt)}</div>
+    ${figureHtml}${approxNote}
+    <div class="choices">${choicesHtml}</div>
     <div class="nav-row">
-      <button class="btn btn-ghost" ${state.qIdx===0?'disabled':''} onclick="prevQuestion()">← Back</button>
-      <button class="btn btn-primary" onclick="nextQuestion()">${state.qIdx===flat.length-1?'Finish section':'Next'} →</button>
+      <div class="nav-left">
+        <button class="btn btn-secondary" ${state.qIdx===0?'disabled':''} onclick="prevQuestion()">← Previous</button>
+        <button class="btn btn-secondary flag-btn ${flagged?'flagged':''}" onclick="toggleFlag()">${flagged?'★ Flagged':'☆ Flag for review'}</button>
+      </div>
+      <div class="nav-right">
+        <button class="btn btn-secondary" onclick="state.screen='sectionReview'; saveSession(); render();">Review section</button>
+        <button class="btn btn-primary" onclick="nextQuestion()">${state.qIdx===flat.length-1?'Finish section':'Next →'}</button>
+      </div>
     </div>
-  </div>`;
+  </section>`;
+
+  if(passageHtml){
+    return `<div class="passage-layout">${passageHtml}${questionCard}</div>`;
+  }
+  return `<div class="test-layout"><aside class="card sidebar">${palette(flat, secId)}</aside>${questionCard}</div>`;
+}
+
+function sectionReviewScreen(){
+  const secId = state.activeSections[state.sectionIdx];
+  const sec = currentTest().sections[secId];
+  const flat = currentSectionFlat();
+  const missing = flat.filter(q=>state.answers[q.id]===undefined);
+  const flagged = flat.filter(q=>state.flags[q.id]);
+  return `<section class="card section-intro">
+    <h1>Review ${sec.name}</h1>
+    <div class="review-grid">
+      <div class="score-box"><span>Answered</span><b>${flat.length-missing.length}/${flat.length}</b></div>
+      <div class="score-box"><span>Not answered</span><b>${missing.length}</b></div>
+      <div class="score-box"><span>Flagged</span><b>${flagged.length}</b></div>
+    </div>
+    ${missing.length ? `<div class="note"><b>Not answered:</b> question${missing.length===1?'':'s'} ${missing.map(q=>flat.indexOf(q)+1).join(', ')}</div>` : `<div class="success-note">Every question has an answer.</div>`}
+    ${flagged.length ? `<p style="margin-top:12px;"><b>Flagged for review:</b> question${flagged.length===1?'':'s'} ${flagged.map(q=>flat.indexOf(q)+1).join(', ')}</p>` : ''}
+    <div class="q-palette" style="max-width:520px; margin-top:16px;">${flat.map((q,i)=>`<button class="q-dot ${state.answers[q.id]!==undefined?'answered':''} ${state.flags[q.id]?'flagged':''}" onclick="jumpToQuestion(${i})">${i+1}</button>`).join('')}</div>
+    <div class="action-row"><button class="btn btn-secondary" onclick="returnToQuestions()">Return to questions</button><button class="btn btn-primary" onclick="submitSection()">Submit section</button></div>
+  </section>`;
 }
 
 function essayScreen(){
   const secId = state.activeSections[state.sectionIdx];
   const sec = currentTest().sections[secId];
   const wordCount = state.essayText.trim() ? state.essayText.trim().split(/\s+/).length : 0;
-  return `
-  <div class="test-topbar">
-    <div class="section-chip">${sec.icon} ${sec.name}</div>
-    <div class="timer-badge mono" id="timerBadge">${state.mode==='timed'?fmtTime(state.timeRemaining):fmtTime(state.timeElapsed)+' elapsed'}</div>
-  </div>
-  <div class="card">
+  return `<section class="card">
     <span class="essay-tag">Not scored — sent to schools as a writing sample</span>
-    <div class="passage-box"><h4>Prompt</h4><p>${esc(sec.prompt)}</p></div>
-    <textarea class="essay-textarea" placeholder="Start writing here..." oninput="state.essayText=this.value; document.getElementById('wordCount').textContent=(this.value.trim()?this.value.trim().split(/\\s+/).length:0)+' words';">${esc(state.essayText)}</textarea>
+    <h1 style="font-size:22px;">${sec.name}</h1>
+    <div class="note" style="margin:14px 0;"><b>Prompt:</b> ${esc(sec.prompt)}</div>
+    <textarea class="essay-textarea" placeholder="Start writing here..." oninput="state.essayText=this.value; document.getElementById('wordCount').textContent=(this.value.trim()?this.value.trim().split(/\\s+/).length:0)+' words'; saveSession();">${esc(state.essayText)}</textarea>
     <div class="essay-meta"><span id="wordCount">${wordCount} words</span><span>Aim for a clear beginning, middle, and end.</span></div>
-    <div class="nav-row"><button class="btn btn-primary btn-block" onclick="finishEssay()">Finish essay →</button></div>
-  </div>`;
+    <div class="action-row"><button class="btn btn-primary btn-block" onclick="finishEssay()">Finish essay →</button></div>
+  </section>`;
 }
 
 function sectionBreakScreen(){
@@ -593,93 +601,85 @@ function sectionBreakScreen(){
   let progressLine;
   if(isEssaySection(sec)){
     const words = state.essayText.trim() ? state.essayText.trim().split(/\s+/).length : 0;
-    progressLine = `You wrote ${words} words. Nice work — this section isn't scored.`;
+    progressLine = `You wrote ${words} words. This section isn't scored.`;
   } else {
     const flat = currentFlat()[secId];
     let correct=0; flat.forEach(q=>{ if(state.answers[q.id]===q.correct) correct++; });
     progressLine = `You got ${correct} out of ${flat.length} correct (${pctOf(correct,flat.length)}%).`;
   }
-  return `<div class="card" style="text-align:center;">
-    <div class="intro-icon" style="margin:0 auto 14px;">🏕️</div>
-    <h2>${sec.name} complete!</h2>
-    <p style="color:var(--ink-soft); margin:8px 0 0;">${progressLine}</p>
-    ${!isLast ? `<p style="margin-top:4px;">Take a short break, then continue to <strong>${currentTest().sections[state.activeSections[state.sectionIdx+1]].name}</strong>.</p>` : `<p style="margin-top:4px;">That's the whole session — nice work!</p>`}
-    <button class="btn btn-primary btn-lg" style="margin-top:18px;" onclick="nextSectionOrResults()">${isLast?'See my basecamp report →':'Continue →'}</button>
-  </div>`;
+  return `<section class="card" style="text-align:center;">
+    <span class="badge">Section complete</span>
+    <h1>${sec.name} done!</h1>
+    <p style="color:var(--muted);">${progressLine}</p>
+    ${!isLast ? `<p>Take a short break, then continue to <b>${currentTest().sections[state.activeSections[state.sectionIdx+1]].name}</b>.</p>` : `<p>That's the whole session — nice work!</p>`}
+    <button class="btn btn-primary" style="margin-top:14px;" onclick="nextSectionOrResults()">${isLast?'See results →':'Continue →'}</button>
+  </section>`;
 }
 
 function resultsScreen(){
   const s = computeSummary();
-  const test = currentTest();
-  const level = currentLevel();
+  const test = currentTest(); const level = currentLevel();
   const fullTest = isFullTest();
-  return `
-  <div class="hero"><h2>Basecamp report</h2>
-    <p>${state.studentName ? esc(state.studentName) : 'Explorer'} finished ${esc(level.label)} · ${esc(test.label)} <span class="mode-pill" style="background:rgba(255,255,255,0.2); color:var(--paper);">${state.mode==='timed'?'⏱ Timed':'✏️ Untimed'}</span>${!fullTest && s.totalQ ? ` <span class="mode-pill" style="background:rgba(255,255,255,0.2); color:var(--paper);">Section practice</span>` : ''}</p>
+  return `<section class="card">
+    <span class="badge">Completed</span>
+    <h1>${state.studentName ? esc(state.studentName) : 'Student'}'s Results</h1>
+    <p class="footer-note">${esc(level.label)} · ${esc(test.label)} · ${state.mode==='timed'?'Timed':'Untimed'}${!fullTest && s.totalQ ? ' · Section practice' : ''}</p>
     ${s.totalQ ? `
     <div class="score-hero-stats">
       <div class="score-stat"><div class="big">${s.totalCorrect}/${s.totalQ}</div><div class="lbl">correct</div></div>
       <div class="score-stat"><div class="big">${s.overallPct}%</div><div class="lbl">percentage</div></div>
-      ${fullTest ? `<div class="score-stat"><div class="big">${s.overallStanine}<span class="stanine-badge" style="width:22px;height:22px;font-size:12px;vertical-align:middle;">≈</span></div><div class="lbl">practice stanine (est.)</div></div>` : ''}
+      ${fullTest ? `<div class="score-stat"><div class="big">${s.overallStanine}</div><div class="lbl">practice stanine (est.)</div></div>` : ''}
     </div>
     ${fullTest ? `
-    <p class="disclaimer-small" style="color:rgba(255,255,255,0.8);">Practice stanine is an estimate from percent correct on this practice test, not an official ERB score — the real ISEE stanine is norm-referenced by grade using ERB's national test-taking population, which this site can't replicate. Shown only after a full test, since a single section isn't a reliable enough sample.</p>
+    <div class="success-note">This is a practice-only estimate based on percent correct on this custom test. It is not an official ISEE stanine — official stanines are norm-referenced by grade using ERB's national test-taking population.
     <details class="stanine-details"><summary>Show practice stanine bands</summary>
-      <div class="stanine-band-table">
-        ${STANINE_BANDS.slice().reverse().map(b=>`<div class="stanine-band-row ${b.stanine===s.overallStanine?'current':''}"><span>Stanine ${b.stanine}</span><span>${b.min}${b.max<100?'–'+b.max:'+'}%</span></div>`).join('')}
-      </div>
-    </details>` : `<p class="disclaimer-small" style="color:rgba(255,255,255,0.8);">Practice stanine only appears after a full test — this was section practice, so percentage is the fairer signal here.</p>`}
+      <div class="stanine-band-table">${STANINE_BANDS.slice().reverse().map(b=>`<div class="stanine-band-row ${b.stanine===s.overallStanine?'current':''}"><span>Stanine ${b.stanine}</span><span>${b.min}${b.max<100?'–'+b.max:'+'}%</span></div>`).join('')}</div>
+    </details></div>` : `<p class="footer-note">Practice stanine only appears after a full test — this was section practice, so percentage is the fairer signal here.</p>`}
+    <div class="review-grid" style="margin-top:18px;">${state.activeSections.map(id=>{
+      const sec = test.sections[id]; const p = s.perSection[id];
+      if(p.isEssay) return `<div class="score-box"><span>${sec.shortName}</span><b>${p.words}</b><span>words · not scored</span></div>`;
+      return `<div class="score-box"><span>${sec.shortName}</span><b>${p.correct}/${p.total}</b><span>${p.pct}%${fullTest?' · stanine '+p.stanine:''}</span></div>`;
+    }).join('')}</div>
     ` : `<p style="margin-top:10px;">This session was writing practice only — nothing to score.</p>`}
-  </div>
-  <div class="stamp-grid">${state.activeSections.map(id=>{
-    const sec = test.sections[id];
-    const p = s.perSection[id];
-    if(p.isEssay){
-      return `<div class="stamp-card"><div class="icon">${sec.icon}</div><h4>${sec.name}</h4><div class="score">${p.words}</div><div class="score-label">words · not scored</div></div>`;
-    }
-    return `<div class="stamp-card"><div class="icon">${sec.icon}</div><h4>${sec.name}</h4><div class="score">${p.correct}/${p.total}</div><div class="score-label">${p.pct}%${fullTest?' · stanine '+p.stanine:''}</div></div>`;
-  }).join('')}
-  </div>
-  <div class="card">
-    <div class="retake-row">
-      <button class="btn btn-secondary" onclick="state.screen='review'; render();">📋 Review answers &amp; explanations</button>
-      <button class="btn btn-secondary" onclick="window.print()">🖨️ Print results</button>
-      <button class="btn btn-primary" onclick="retakeSameSession()">🔁 Retake this session</button>
-      <button class="btn btn-ghost" onclick="goHome()">🏠 Back to trailhead</button>
+    <div class="action-row">
+      <button class="btn btn-primary" onclick="window.print()">🖨️ Print results</button>
+      <button class="btn btn-secondary" onclick="state.screen='review'; render();">📋 Review answers</button>
+      <button class="btn btn-secondary" onclick="retakeSameSession()">🔁 Retake this session</button>
+      <button class="btn btn-ghost" onclick="goHome()">🏠 Back to start</button>
     </div>
-  </div>`;
+  </section>`;
 }
 
 function reviewScreen(){
-  const test = currentTest();
-  const flat = currentFlat();
-  return `<div class="card">
-    <h2 style="margin-bottom:6px;">Review answers</h2>
-    <p style="color:var(--ink-soft); margin-top:0;">Green means correct, coral means it needs another look. Explanations are from the workbook's answer key.</p>
-    ${state.activeSections.map(id=>{
-      const sec = test.sections[id];
-      if(isEssaySection(sec)){
-        return `<h3 style="margin:22px 0 6px; color:var(--fern-deep); font-size:17px;">${sec.icon} ${sec.name}</h3>
-        <div class="review-item"><span class="review-tag skipped">Not scored</span>
-        <div class="rq">Prompt: ${esc(sec.prompt)}</div>
-        <div style="font-size:14px; color:var(--ink-soft); white-space:pre-wrap;">${esc(state.essayText) || '<em>Nothing written this time.</em>'}</div></div>`;
-      }
-      return `<h3 style="margin:22px 0 6px; color:var(--fern-deep); font-size:17px;">${sec.icon} ${sec.name}</h3>
-      ${flat[id].map((q,i)=>{
-        const given = state.answers[q.id];
-        const tag = given===undefined ? '<span class="review-tag skipped">Skipped</span>' : given===q.correct ? '<span class="review-tag right">Correct</span>' : '<span class="review-tag wrong">Try again</span>';
-        const correctLabel = q.choiceRender==='triangle' ? `the ${q.choices[q.correct]}-pointing option` : esc(q.choices[q.correct]);
-        const givenLabel = q.choiceRender==='triangle' ? (given!==undefined?`the ${q.choices[given]}-pointing option`:'') : (given!==undefined?esc(q.choices[given]):'');
-        return `<div class="review-item">
-          ${tag}${q.approximated?' <span class="review-tag skipped">Recreated diagram</span>':''}
-          <div class="rq">${i+1}. ${esc(q.prompt)}</div>
-          <div style="font-size:14px; color:var(--ink-soft);">Correct answer: <strong>${correctLabel}</strong>${given!==undefined && given!==q.correct ? ` · Your answer: ${givenLabel}` : ''}</div>
-          ${q.explanation ? `<div class="review-explain">${esc(q.explanation)}</div>` : ''}
-        </div>`;
-      }).join('')}`;
-    }).join('')}
-    <div class="nav-row"><button class="btn btn-primary btn-block" onclick="state.screen='results'; render();">← Back to report</button></div>
-  </div>`;
+  const test = currentTest(); const flat = currentFlat();
+  let review = '';
+  state.activeSections.forEach(id=>{
+    const sec = test.sections[id];
+    if(isEssaySection(sec)){
+      review += `<article class="review-item skipped"><h3>${sec.icon} ${sec.name}</h3>
+        <div class="answer-line">Prompt: ${esc(sec.prompt)}</div>
+        <p style="white-space:pre-wrap;">${esc(state.essayText) || '<em>Nothing written this time.</em>'}</p></article>`;
+      return;
+    }
+    flat[id].forEach((q,i)=>{
+      const given = state.answers[q.id];
+      const ok = given===q.correct;
+      const correctLabel = q.choiceRender==='triangle' ? `the ${q.choices[q.correct]}-pointing option` : esc(q.choices[q.correct]);
+      const givenLabel = q.choiceRender==='triangle' ? (given!==undefined?`the ${q.choices[given]}-pointing option`:'—') : (given!==undefined?esc(q.choices[given]):'—');
+      review += `<article class="review-item ${given===undefined?'skipped':(ok?'correct':'incorrect')}">
+        <h3>${sec.icon} ${sec.shortName} ${i+1}: ${esc(q.prompt)}</h3>
+        <div class="answer-line ${ok?'good':'bad'}">Your answer: ${givenLabel}${given!==undefined?(ok?' ✓':' ✗'):''}</div>
+        ${!ok?`<div class="answer-line good">Correct answer: ${correctLabel}</div>`:''}
+        ${q.explanation?`<p>${esc(q.explanation)}</p>`:''}
+        ${q.approximated?`<p class="footer-note">⚠️ Recreated diagram — verify against the printed workbook.</p>`:''}
+      </article>`;
+    });
+  });
+  return `<section class="card">
+    <h1 style="font-size:24px;">Answer review</h1>
+    ${review}
+    <div class="action-row"><button class="btn btn-primary btn-block" onclick="state.screen='results'; render();">← Back to results</button></div>
+  </section>`;
 }
 
 loadSaved();
