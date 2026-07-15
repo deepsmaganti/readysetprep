@@ -1,69 +1,55 @@
-READYSETPREP — ISEE PRACTICE, ALL LEVELS
-Host-ready static website (no server, no build step, no database)
-Interactive: jump to any question via the question palette, flag questions
-for review, check a per-section review screen before submitting, and
-resume a saved-in-progress test after closing the browser.
+READYSETPREP — MODULAR MULTI-TEST WEBSITE
 
-FILES
-- index.html   the app shell — page structure and styling, rarely changes
-- app.js       all app logic — screens, timer, scoring, storage; rarely changes
-- data.js      all test content (passages, questions, answers) — this is the
-               ONLY file you should need to replace when adding a new test
-- privacy.html a plain-language privacy notice, linked from the home screen
+This version keeps the current ReadySetPrep design but separates the website engine from the test content. You can add many tests without editing the main application.
 
-DEPLOYMENT — GITHUB PAGES (recommended, already set up)
-1. Create a public GitHub repository.
-2. Upload index.html, app.js, data.js, and privacy.html to the repo root.
-3. In the repo's Settings > Pages, set Source to "Deploy from a branch",
-   branch "main", folder "/ (root)", then Save.
-4. GitHub publishes a URL like https://yourusername.github.io/reponame/
-   within about a minute. Share that URL.
+FOLDER STRUCTURE
+- index.html                 small app shell
+- styles.css                all styling
+- js/catalog.js             test registry and level definitions
+- js/app.js                 navigation, timer, audio, scoring, results
+- tests/manifest.js          list of test files that should be loaded
+- tests/primary2-test2.js    the current complete Primary 2 test
+- tests/test-template.js     copy this to create a new test
+- privacy.html              privacy notice
 
-DEPLOYMENT — ALTERNATIVES
-Netlify Drop or Vercel: drag all four files (or a zip of them) into their
-drag-and-drop deploy page for an instant HTTPS URL. No account required
-for a one-off Netlify Drop.
+ADD A NEW TEST
+1. Duplicate tests/test-template.js.
+2. Rename it, for example tests/primary3-test1.js.
+3. Fill in the test metadata, sections, passages, questions, answers, and explanations.
+4. Add its path to tests/manifest.js:
 
-ADDING A NEW TEST
-Only data.js changes. Upload the workbook PDF to Claude and ask for it to
-be added; Claude will return an updated data.js. In your repo, open
-data.js, click the pencil (edit) icon, select all, paste the new content,
-and commit. index.html and app.js never need to be touched for this.
+   window.READYSETPREP_TEST_FILES = [
+     'tests/primary2-test2.js',
+     'tests/primary3-test1.js'
+   ];
 
-CURRENT DATA MODEL
-- Any number of students/visitors can use the same public URL at the same
-  time — there's no login and no server-side state.
-- Each browser/device stores its own progress locally (via localStorage).
-  There is no teacher dashboard, no account system, and no central score
-  database.
-- An in-progress test autosaves after every answer/flag/timer tick, so a
-  closed browser tab can be resumed later via "Resume saved test" on the
-  home screen. Only one in-progress session is kept at a time.
-- On a shared device/browser, one student's saved session (name, history,
-  in-progress test) can be overwritten by the next student's session.
-- Encourage students to use the "Print results" button on the results
-  screen to save a record before clearing browser data or handing the
-  device to someone else.
+5. Upload the new/changed files. The test automatically appears under its level in the Practice test dropdown.
 
-RECOMMENDED STUDENT IDENTIFIER
-Use a nickname, initials, or a teacher-assigned code in the "Explorer's
-name" field rather than a child's full legal name — see privacy.html.
+IMPORTANT IDS
+- Every test.id must be unique across the website.
+- Every section.id must be unique within its test.
+- Question num values must be unique within each section.
 
-PRACTICE STANINE
-- A completed FULL test (all sections for that level) shows an Estimated
-  Practice Stanine from 1–9, plus the underlying percentage.
-- It intentionally does NOT appear after single-section practice — a
-  partial session isn't a large enough sample for even a rough estimate,
-  so only percentage/raw score is shown there.
-- It's a transparent, raw-accuracy practice band (bands are shown in full
-  on the results screen via "Show practice stanine bands"), not an
-  official ISEE stanine. Official ISEE stanines are norm-referenced by
-  grade and calculated from scaled scores using ERB's national
-  test-taking population — this site has no access to that data.
+SUPPORTED SECTION TYPES
+- auditory: a visible/replayable passage and questions
+- reading: one or more passages, each with questions
+- questions: standalone questions for math, verbal, quantitative, etc.
+- essay: an unscored writing prompt
 
-POSSIBLE FUTURE ADDITIONS (not built — just ideas)
-- Teacher/parent and student sign-in
-- Class codes and assignments
-- Central score storage across devices
-- Full attempt history export (CSV)
-- Teacher dashboard
+STUDENT DATA
+Each test saves independently in the browser using its unique test id. Adding a new test will not overwrite progress from another test.
+
+DEPLOYMENT
+Upload the entire folder structure to GitHub Pages, Netlify, or Vercel. Do not flatten the folders because index.html expects js/ and tests/ paths.
+
+
+COMPLETED-TEST LOG
+- Every completed full test and completed section-practice attempt is logged.
+- The home page shows student, ISEE level, test, mode, completion date,
+  overall score, practice stanine (for full tests), and section details.
+- The log combines attempts from every published test and every level.
+- Results can be exported as a CSV file.
+- The log is stored in localStorage, so it is shared only by users of the
+  same browser profile on the same device.
+- A central all-student log requires a database/back-end and is not part
+  of this static version.
