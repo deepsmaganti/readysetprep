@@ -49,3 +49,15 @@ window.READYSETPREP_TEST_FILES = [
 COMPLETED TEST LOG
 Completed tests are logged in the browser being used. The log is not shared
 between different devices or students yet.
+
+
+PRIMARY 2 PRACTICE TEST #3
+- Added primary2-test3.js.
+- Uses the same structure as Practice Test #2:
+  6 Auditory Comprehension questions,
+  18 Reading questions across three passages,
+  and 24 Mathematics questions.
+- The test includes original passages, visuals, answers, explanations,
+  timers, answer elimination, review, scoring, practice stanine,
+  and completed-test logging.
+- manifest.js now loads both Primary 2 tests.

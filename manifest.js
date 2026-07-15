@@ -1,4 +1,5 @@
-// Add one file path to this list for every test you want to publish.
+// One root-level file name for every published ReadySetPrep test.
 window.READYSETPREP_TEST_FILES = [
-  'primary2-test2.js'
+  'primary2-test2.js',
+  'primary2-test3.js'
 ];

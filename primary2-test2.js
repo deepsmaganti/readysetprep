@@ -1,6 +1,7 @@
 ReadySetPrep.registerTest({
   "id": "primary2-test2",
   "levelId": "primary2",
+  "order": 2,
   "label": "Practice Test #2",
   "title": "ISEE Primary 2 Practice Test #2",
   "description": "6 auditory, 18 reading, and 24 mathematics questions",
