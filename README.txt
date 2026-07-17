@@ -226,3 +226,84 @@ PRIMARY 2 FOOTER CLEANUP
 - Removed the availability message below the Primary 2 test tabs.
 - The compact Test 1 through Test 6 tabs remain unchanged.
 - Lower Level availability footer remains removed.
+
+
+TEST ASSESSMENT REPORTS
+- Every completed full test or section practice automatically creates one
+  saved assessment report.
+- Assessment reports are available separately for Primary 2 and Lower Level.
+- Each assessment captures:
+  - section scores, percentages, estimated practice stanines, and unanswered counts
+  - concept-level performance
+  - strongest concepts
+  - focus areas
+  - recommended next steps
+  - test name, student identifier, date, and practice mode
+- Lower Level reports also include an essay writing snapshot based on word count
+  and paragraph count. It does not grade writing quality.
+- An Assessment History button appears on each test-level home page.
+- Saved reports can be viewed, printed, deleted individually, or cleared.
+- Up to 40 recent assessments per level are stored locally in the browser.
+- Retaking or clearing a test does not erase assessment history.
+- Reports are unofficial practice feedback and are not official ISEE scores,
+  percentiles, diagnoses, admissions predictions, or educational evaluations.
+
+
+EXACT SHARED UI ACROSS TEST LEVELS
+- Primary 2 and Lower Level now use the same test-page component structure.
+- The same shared CSS block is embedded in both full-test files.
+- Identical layout is used for:
+  - ReadySetPrep branding
+  - test tabs
+  - selected-test state
+  - test title
+  - four mode cards
+  - section selector
+  - student-name input
+  - Start, Resume, Clear, Assessment History, and Home controls
+  - footer, top navigation, timer, cards, choices, results, and assessment styling
+- The same four-column desktop, two-column tablet, and one-column mobile
+  responsive pattern is used for all levels.
+- Only test-specific content changes: level name, number of tests, section names,
+  question counts, and section descriptions.
+- Home always returns to index.html; it does not link directly to another level.
+
+
+ANSWER CONFIDENCE MARKERS
+- Every scored question now has a separate “Mark not sure” control.
+- The marker is independent from the selected answer and from Flag for Review.
+- Marking a question not sure never changes the answer or score.
+- Question palettes and section-review screens show a ? badge.
+- Assessment reports include:
+  - total questions marked not sure
+  - not-sure counts by section and concept
+  - correct answers that were marked not sure
+  - incorrect answers that were not marked not sure
+  - confidence-focused next-step recommendations
+- Older saved tests automatically receive empty confidence-marker storage.
+
+READING COMPREHENSION HIGHLIGHTER
+- Primary 2 and Lower Level Reading passages support persistent highlighting.
+- Students select words or sentences and choose Highlight selection.
+- Multiple selections can be highlighted in each passage.
+- Clicking highlighted text removes that highlight.
+- Clear highlights removes every highlight from the current passage.
+- Highlights persist while navigating questions and after reopening a saved test.
+- Highlights are private browser annotations and do not affect scoring.
+
+
+CONFIDENCE MARKER TEXT CLEANUP
+- Removed the explanatory “Not confident?” message below the answer choices.
+- The Mark not sure button and all confidence tracking remain unchanged.
+
+
+READING HIGHLIGHT CONTROLS UPDATE
+- Removed the instructional sentence from the reading highlight toolbar.
+- Renamed Clear highlights to Clear all highlights.
+- Clear all highlights removes every saved reading highlight in the current
+  test attempt, across all reading passages.
+- Selecting the same highlighted text and pressing Highlight selection removes
+  that highlighted section.
+- Selecting text fully inside an existing highlighted section also removes that
+  highlighted section.
+- Clicking highlighted text continues to remove that individual highlight.

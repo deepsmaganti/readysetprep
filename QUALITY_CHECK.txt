@@ -116,3 +116,60 @@ PRIMARY FOOTER CHECK
 - Primary 2 compact test tabs preserved
 - Lower Level availability footer remains removed
 - JavaScript syntax check: PASSED
+
+
+ASSESSMENT FEATURE VALIDATION
+- Primary 2 automatic assessment capture
+- Lower Level automatic assessment capture
+- One assessment per completed attempt
+- Full-test and section-practice assessments supported
+- Separate local history by level
+- Section and concept diagnostics
+- Strength and focus-area generation
+- Recommended next steps
+- Lower essay structure snapshot
+- Print, view, delete, and clear-history actions
+- All four test modes preserved on both levels
+
+
+CROSS-LEVEL UI CONSISTENCY CHECK
+- Same home-screen DOM hierarchy on Primary 2 and Lower
+- Same shared CSS specification embedded in both pages
+- Same four mode-card grid and breakpoints
+- Same test-tab sizing and active state
+- Same header, typography, spacing, buttons, input, footer, and top bar
+- Same Assessment History placement
+- Same Home navigation behavior
+- All test content and all four test modes preserved
+
+
+CONFIDENCE + HIGHLIGHT VALIDATION
+- Primary 2 confidence marker
+- Lower Level confidence marker
+- Independent from answers and Flag for Review
+- ? marker in section navigation and review
+- Confidence analysis in saved assessments
+- Primary 2 Reading passage highlighting
+- Lower Level Reading passage highlighting
+- Persistent highlight ranges stored by passage
+- Individual highlight removal and clear-all support
+- Same shared CSS and interaction pattern on both levels
+- Existing four test modes preserved
+
+
+CONFIDENCE HELPER TEXT CHECK
+- Explanatory helper sentence removed from Primary 2
+- Explanatory helper sentence removed from Lower Level
+- Mark not sure control preserved
+- Assessment confidence analysis preserved
+- JavaScript syntax checks: PASSED
+
+
+READING HIGHLIGHT CONTROL CHECK
+- Instructional toolbar sentence removed
+- Clear all highlights clears all passages in the current test
+- Same highlighted selection toggles off
+- Selection inside an existing highlight toggles that highlight off
+- Direct click-to-remove remains available
+- Primary 2 and Lower Level behavior matched
+- JavaScript syntax checks: PASSED
