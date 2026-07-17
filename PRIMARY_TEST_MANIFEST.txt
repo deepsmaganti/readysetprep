@@ -1,0 +1,22 @@
+READYSETPREP PRIMARY 2 TEST MANIFEST
+
+File: primary-tests.html
+Tests: 6
+Each test:
+- Auditory Comprehension: 6 questions, 7 minutes
+- Reading: 18 questions, 20 minutes
+- Mathematics: 24 questions, 26 minutes
+
+Modes preserved:
+- Timed Full Test
+- Untimed Full Test
+- Timed by Section
+- Untimed by Section
+
+Direct links:
+primary-tests.html?test=1
+primary-tests.html?test=2
+primary-tests.html?test=3
+primary-tests.html?test=4
+primary-tests.html?test=5
+primary-tests.html?test=6

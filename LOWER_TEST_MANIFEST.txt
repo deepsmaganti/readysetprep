@@ -1,0 +1,6 @@
+READYSETPREP LOWER LEVEL TEST MANIFEST
+
+lower-test1: verbal 34, quantitative 38, reading 25 ([332, 325, 312, 316, 339]), math 30, essay 1
+lower-test2: verbal 34, quantitative 38, reading 25 ([327, 305, 304, 304, 312]), math 30, essay 1
+
+UI: Lower Level interface unified with the Primary 2 interaction pattern.

@@ -1,0 +1,94 @@
+READYSETPREP PRIMARY 2 — GRADE-ALIGNMENT REVIEW
+
+RESULT REPORTING
+- Auditory section stanine
+- Reading section stanine
+- Mathematics section stanine
+- Total raw score and percentage
+- No overall full-test stanine
+
+AUDITORY READ-ALOUD
+- Full passage read aloud
+- Every question and all four choices read aloud automatically
+- Pause, resume, restart question, replay passage, and stop controls
+
+GRADE 2 ALIGNMENT
+Tests #1-#4 were already appropriate for Primary 2.
+Tests #5-#6 had a few tasks with unnecessarily high working-memory demands.
+
+Adjusted in Tests #5-#6:
+- Reduced selected three-operation problems to two operations
+- Removed remainder-based sharing
+- Replaced cross-hour elapsed time with a within-hour interval
+- Simplified selected combined-data comparisons
+- Simplified wording while preserving inference and reasoning
+
+FINAL PROGRESSION
+#1 Gentle start
+#2 On level
+#3 On level+
+#4 Moderate challenge
+#5 Grade 2 stretch
+#6 Grade 2 stretch+
+
+All six tests retain:
+- Main idea, detail, inference, sequence, vocabulary, and author purpose
+- Patterns, place value, graphs, fractions of groups, measurement, geometry,
+  symmetry, probability, equal sharing, and two-step arithmetic
+
+JavaScript syntax check: PASSED
+
+
+COMPACT SELECTOR CHECK
+- Difficulty badges removed from test tabs
+- Test descriptions removed from test tabs
+- Selected-test description beneath the title removed
+- Compact wrapping test tabs installed
+- JavaScript syntax check: PASSED
+
+
+PRACTICE EXERCISE VALIDATION
+- Six ISEE levels included
+- Five concept modules per level
+- Five questions per concept
+- 150 original concept-practice questions total
+- Four choices and one validated answer per question
+- Immediate feedback and explanations
+- Local mastery tracking
+- Mixed-practice mode
+- JavaScript syntax check: PASSED
+
+
+LOWER LEVEL TEST VALIDATION
+- Two complete Lower Level tests
+- 34 Verbal Reasoning questions per test
+- Verbal split: 17 synonyms + 11 single-word completions + 6 phrase completions
+- 38 Quantitative Reasoning questions per test
+- 25 Reading Comprehension questions per test
+- Five reading passages per test; five questions per passage
+- Reading passages verified at 300-600 words
+- Reading strands include main idea, supporting ideas, inference, vocabulary, organization/logic, and tone/style/figurative language
+- 30 Mathematics Achievement questions per test
+- Mathematics includes whole numbers; decimals, percents, and fractions; algebraic concepts; geometry; measurement; data analysis and probability
+- One unscored 30-minute essay prompt per test
+- Answer positions balanced within every scored section
+- JavaScript syntax check: PASSED
+
+
+UNIFIED UI CHECK
+- Main-page Lower Level links use compact test tabs
+- Lower test page uses compact test tabs
+- Same four practice-mode layout as Primary 2
+- Same selected-card and section-choice interaction pattern
+- Same top-bar, timer, button, and review styling pattern
+- Lower-specific test functionality and data preserved
+
+
+SEPARATE PAGE VALIDATION
+- Main hub: index.html
+- Primary full tests: primary-tests.html
+- Lower full tests: lower-tests.html
+- Primary modes preserved: Timed Full, Untimed Full, Timed by Section, Untimed by Section
+- Lower modes preserved: Timed Full, Untimed Full, Timed by Section, Untimed by Section
+- Lower test page preserved byte-for-byte from the unified UI build
+- Direct test query links validated
