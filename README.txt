@@ -201,3 +201,28 @@ SEPARATE TEST PAGES
 - Primary 2 retains all four modes:
   Timed Full, Untimed Full, Timed by Section, and Untimed by Section.
 - Lower Level retains all four modes without any functional or content changes.
+
+
+HOME-ONLY LEVEL NAVIGATION
+- Removed links from one test level to another test level.
+- The main index page remains the only place to switch ISEE levels.
+- primary-tests.html contains only Primary 2 test tabs.
+- lower-tests.html contains only Lower Level test tabs.
+- Each separate test page has a Home button linking to index.html.
+- Removed the footer button that linked to Primary 2 while another level
+  was selected.
+- Fixed the saved-level bug that could make primary-tests.html display a
+  Lower Level "coming soon" screen.
+- Timed Full, Untimed Full, Timed by Section, and Untimed by Section remain
+  unchanged for both Primary 2 and Lower Level.
+
+
+LOWER LEVEL FOOTER CLEANUP
+- Removed the availability message below the Lower Level test tabs.
+- The compact Test 1 and Test 2 tabs remain unchanged.
+
+
+PRIMARY 2 FOOTER CLEANUP
+- Removed the availability message below the Primary 2 test tabs.
+- The compact Test 1 through Test 6 tabs remain unchanged.
+- Lower Level availability footer remains removed.

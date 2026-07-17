@@ -92,3 +92,27 @@ SEPARATE PAGE VALIDATION
 - Lower modes preserved: Timed Full, Untimed Full, Timed by Section, Untimed by Section
 - Lower test page preserved byte-for-byte from the unified UI build
 - Direct test query links validated
+
+
+HOME-ONLY NAVIGATION VALIDATION
+- No level selector rendered inside primary-tests.html
+- No level selector rendered inside lower-tests.html
+- No Lower-to-Primary footer link on index.html
+- Primary page forced to Primary 2 regardless of the level last selected on index.html
+- Primary same-level test tabs preserved
+- Lower same-level test tabs preserved
+- Home buttons link to index.html
+- Four test modes preserved on both pages
+
+
+LOWER FOOTER CHECK
+- “Two full Lower Level tests are available” message removed
+- Compact Lower Level test tabs preserved
+- JavaScript syntax check: PASSED
+
+
+PRIMARY FOOTER CHECK
+- “Six full Primary 2 tests are available” message removed
+- Primary 2 compact test tabs preserved
+- Lower Level availability footer remains removed
+- JavaScript syntax check: PASSED

@@ -289,8 +289,7 @@ const LEVELS = {
 };
 const LEVEL_ORDER=['primary2','primary3','primary4','lower','middle','upper'];
 const LEVEL_STORAGE_KEY='readysetprep:selected-level';
-let selectedLevelId=localStorage.getItem(LEVEL_STORAGE_KEY)||'primary2';
-if(!LEVELS[selectedLevelId]) selectedLevelId='primary2';
+let selectedLevelId='primary2';
 function selectedLevel(){return LEVELS[selectedLevelId]}
 
 function freshState(student=''){
@@ -427,37 +426,10 @@ function stanineMessage(s){
 function home(){
  stopTimer();
  const saved=load();
- const level=selectedLevel();
- const levelCards=LEVEL_ORDER.map(id=>{
-   const l=LEVELS[id];
-   return `<button class="level-card ${id===selectedLevelId?'active':''}" data-level="${id}" style="--level-accent:${l.accent};--level-soft:${l.soft}">
-     <span class="level-dot">${l.short}</span><strong>${l.label}</strong><small>${l.subtitle}</small>
-   </button>`;
- }).join('');
 
- if(selectedLevelId!=='primary2'){
-   const blueprint=level.blueprint.map(x=>`<div class="blueprint-item"><b>${escapeHtml(x.name)}</b><span>${x.unscored?'Unscored writing sample':`${x.questions} questions`} · ${x.minutes} minutes</span></div>`).join('');
-   document.getElementById('app').innerHTML=`<main class="container"><section class="card hero home-hero">
-     <div class="site-brand-row"><div class="site-mark">R</div><div><div class="site-name">ReadySetPrep</div><div class="site-tagline">ISEE practice for every level</div></div></div>
-     <div class="level-heading">Choose an ISEE level</div><div class="level-picker">${levelCards}</div>
-     <div class="level-overview" style="border-top:5px solid ${level.accent}">
-       <span class="badge" style="background:${level.soft};color:${level.accent}">${escapeHtml(level.subtitle)}</span>
-       <h2>${escapeHtml(level.label)} Level</h2>
-       <p>The website navigation is ready for this level. Its test question bank can be added next without changing the student experience.</p>
-       <div class="blueprint-grid">${blueprint}</div>
-       <div class="coming-soon"><b>Practice tests coming next.</b> Primary 2 is currently available as a complete interactive test.</div>
-     </div>
-     <div class="home-footer"><button class="btn btn-secondary" data-level-jump="primary2">Open the available Primary 2 test</button><a href="privacy.html">Privacy notice</a></div>
-   </section></main>`;
-   bindLevelNavigation();
-   const jump=document.querySelector('[data-level-jump]');
-   if(jump) jump.onclick=()=>selectLevel('primary2');
-   return;
- }
 
  document.getElementById('app').innerHTML=`<main class="container"><section class="card hero home-hero">
- <div class="site-brand-row"><div class="site-mark">R</div><div><div class="site-name">ReadySetPrep</div><div class="site-tagline">ISEE practice for every level</div></div></div>
- <div class="level-heading">Choose an ISEE level</div><div class="level-picker">${levelCards}</div>
+ <div class="site-brand-row"><div class="site-mark">R</div><div><div class="site-name">ReadySetPrep</div><div class="site-tagline">Primary 2 practice tests</div></div></div>
  <div class="test-heading">Choose a Primary 2 practice test</div>
  <div class="test-picker">
   ${TEST_ORDER.map(id=>`<button class="test-option ${id===selectedTestId?'active':''}" data-test="${id}">
@@ -483,7 +455,6 @@ function home(){
  <div class="home-footer"><p class="footer-note">Works in Chrome on a Chromebook, Mac, or PC. Progress is saved in this browser. Audio uses the device’s built-in voice.</p><a href="privacy.html">Privacy notice</a></div>
  </section></main>`;
 
- bindLevelNavigation();
  bindTestNavigation();
  let chosenMode=null,chosenSection=null;
  document.querySelectorAll('[data-mode]').forEach(el=>el.onclick=()=>{

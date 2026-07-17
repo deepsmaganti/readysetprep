@@ -530,7 +530,7 @@ function home(){
        <div class="test-picker linked-test-picker">
         ${[1,2,3,4,5,6].map(number=>`<a class="test-option" href="primary-tests.html?test=${number}"><strong>Test ${number}</strong></a>`).join('')}
        </div>
-       <div class="coming-soon available-tests-note"><b>Six full Primary 2 tests are available.</b> Open a compact test tab above to begin.</div>
+
       `:selectedLevelId==='lower'?`
        <div class="practice-launch-bar"><div><b>Practice Exercises</b><span>Build mastery one concept at a time</span></div><button class="btn btn-primary" id="openLevelExercises">Open exercises</button></div>
        <div class="test-heading">Choose a Lower Level practice test</div>
@@ -538,16 +538,15 @@ function home(){
         <a class="test-option" href="lower-tests.html?test=1"><strong>Test 1</strong></a>
         <a class="test-option" href="lower-tests.html?test=2"><strong>Test 2</strong></a>
        </div>
-       <div class="coming-soon available-tests-note"><b>Two full Lower Level tests are available.</b> Open a compact test tab above to begin.</div>
+
       `:`<div class="coming-soon"><b>Concept practice is available now.</b> Full practice tests for this level can be added separately.</div><div style="margin-top:15px"><button class="btn btn-primary" id="openLevelExercises">Open ${escapeHtml(level.label)} practice exercises</button></div>`}
      </div>
-     <div class="home-footer"><button class="btn btn-secondary" data-level-jump="primary2">Open Primary 2 practice tests</button><a href="privacy.html">Privacy notice</a></div>
+     <div class="home-footer"><a href="privacy.html">Privacy notice</a></div>
    </section></main>`;
    bindLevelNavigation();
    const exercises=document.getElementById('openLevelExercises');
    if(exercises)exercises.onclick=showPracticeExercises;
-   const jump=document.querySelector('[data-level-jump]');
-   if(jump) jump.onclick=()=>{window.location.href='primary-tests.html'};
+
    return;
  }
 
