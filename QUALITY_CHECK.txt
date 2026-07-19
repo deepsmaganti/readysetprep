@@ -216,3 +216,11 @@ PRIMARY 2 TEST 2 AUDITORY ERB-PATTERN CHECK
 - Post-test transcript retained for review
 - Other Primary tests unchanged
 - Auditory count remains 6 questions / 7 minutes
+
+
+PRIMARY 2 AUDITORY SCOPE CORRECTION
+- ERB-style auditory presentation applies to all 6 Primary 2 practice tests
+- No auditory passage text shown during active testing
+- Question and answer-choice text remains visible
+- Auto-read of auditory questions preserved
+- Post-test transcript preserved

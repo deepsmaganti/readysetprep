@@ -900,7 +900,7 @@ if(requestedTestId&&TESTS[requestedTestId]) selectedTestId=requestedTestId;
 if(!TESTS[selectedTestId]) selectedTestId='primary2-test1';
 let TEST=TESTS[selectedTestId];
 function currentTestInfo(){return TEST_INFO[selectedTestId]}
-function usesErbAuditoryPattern(){return selectedTestId==='primary2-test2'}
+function usesErbAuditoryPattern(){return true}
 function storageKeyForTest(id){
   // Preserve any existing saved progress from the original Practice Test #2.
   return id==='primary2-test2'?'readysetprep_primary2_test_v1':`readysetprep_${id}_v1`;

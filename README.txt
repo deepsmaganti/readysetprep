@@ -363,3 +363,16 @@ PRIMARY 2 TEST 2 — ERB-STYLE AUDITORY PRESENTATION
 - The passage transcript remains available after completion for answer review.
 - This presentation change applies only to Primary 2 Practice Test #2.
 - Other Primary 2 practice tests retain their existing auditory presentation.
+
+
+PRIMARY 2 AUDITORY — ERB-STYLE PRESENTATION FOR ALL TESTS
+- Corrected the previous scope: the ERB-style Auditory Comprehension
+  presentation now applies to the entire Primary 2 level, not only Practice
+  Test #2.
+- All six Primary 2 practice tests now:
+  - hide the auditory passage text during the listening phase
+  - hide the auditory passage text while answering questions
+  - keep the question and answer choices visible
+  - automatically read each auditory question and its answer choices aloud
+  - omit the passage replay control while the student is answering questions
+- The passage transcript remains available only after completion for review.
