@@ -307,3 +307,59 @@ READING HIGHLIGHT CONTROLS UPDATE
 - Selecting text fully inside an existing highlighted section also removes that
   highlighted section.
 - Clicking highlighted text continues to remove that individual highlight.
+
+
+FLAG-ONLY REVIEW WORKFLOW
+- Removed the Mark not sure control from Primary 2 and Lower Level.
+- Flag for Review remains the only per-question review marker.
+- Assessment reports display:
+  - total flagged questions
+  - flagged count by section
+  - question numbers that were flagged
+- Flags are reference-only metadata.
+- Flags are not used to calculate scores, strengths, focus areas, concept
+  performance, or recommended next steps.
+- Answer review displays a ★ Flagged for review tag on questions that the
+  student flagged.
+- Older saved confidence-marker data is ignored.
+
+
+COMPACT TEST-MODE CARDS
+- Reduced the height and padding of the four test-mode buttons.
+- Reduced badge, heading, and description text sizes slightly.
+- Reduced spacing between cards.
+- The exact same dimensions are used for Primary 2 and Lower Level.
+- All four modes and their behavior remain unchanged.
+
+
+COMPLETE ASSESSMENT HISTORY
+- Assessment History now includes attempts from every practice test within the
+  selected ISEE level, not only the currently selected test.
+- Every history card and detailed report clearly shows:
+  - practice test
+  - exact mode: Timed Full, Untimed Full, Timed by Section, or Untimed by Section
+  - section scope: All sections or the specific section practiced
+  - student and completion date
+- Assessment history includes filters for:
+  - practice test
+  - timed or untimed
+  - full test or individual section
+- The screen shows how many records match the active filters.
+- Older assessment records remain compatible; missing timing metadata is
+  inferred from their saved mode and section scope.
+- Primary 2 and Lower Level histories remain separate, but each history covers
+  all tests within that level.
+
+
+PRIMARY 2 TEST 2 — ERB-STYLE AUDITORY PRESENTATION
+- Practice Test #2 now follows ERB's described online Auditory Comprehension
+  presentation pattern:
+  - the student listens to the passage without seeing the passage text
+  - during the question phase, the question and answer choices remain visible
+  - each auditory question and its choices are read aloud automatically
+- The passage is not displayed on the listening screen or beside the questions.
+- The passage replay button is not shown while answering Test #2 auditory
+  questions.
+- The passage transcript remains available after completion for answer review.
+- This presentation change applies only to Primary 2 Practice Test #2.
+- Other Primary 2 practice tests retain their existing auditory presentation.

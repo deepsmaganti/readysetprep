@@ -173,3 +173,46 @@ READING HIGHLIGHT CONTROL CHECK
 - Direct click-to-remove remains available
 - Primary 2 and Lower Level behavior matched
 - JavaScript syntax checks: PASSED
+
+
+FLAG-ONLY VALIDATION
+- Mark not sure UI removed from Primary 2
+- Mark not sure UI removed from Lower Level
+- Confidence-marker analysis removed
+- Flag for Review retained
+- Flag counts and question numbers shown in assessment reports
+- Flags excluded from strength, focus, score, and recommendation logic
+- Flag tag shown in answer review
+- Reading highlighting preserved
+
+
+COMPACT MODE-CARD CHECK
+- Desktop minimum height reduced to 190px
+- Card padding reduced to 22px × 24px
+- Card heading reduced to 22px
+- Description reduced to 15px
+- Shared styling identical across Primary 2 and Lower Level
+- JavaScript syntax checks: PASSED
+
+
+ASSESSMENT-HISTORY COVERAGE CHECK
+- All tests within Primary 2 shown in one history
+- All tests within Lower Level shown in one history
+- Timed versus untimed displayed
+- Full-test versus section-practice displayed
+- Exact section displayed
+- Test, timing, and scope filters added
+- Existing older assessment records supported
+- Detailed assessment report includes practice setup
+- JavaScript syntax checks: PASSED
+
+
+PRIMARY 2 TEST 2 AUDITORY ERB-PATTERN CHECK
+- Test 2 passage hidden during auditory listening screen
+- Test 2 passage hidden during auditory questions
+- Question and answer-choice text remains visible
+- Questions continue to auto-read aloud when opened
+- Passage replay control removed from Test 2 question screen
+- Post-test transcript retained for review
+- Other Primary tests unchanged
+- Auditory count remains 6 questions / 7 minutes
