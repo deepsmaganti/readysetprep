@@ -1,0 +1,27 @@
+READYSETPREP VENMO SETUP
+
+Before deploying payment.html:
+
+1. Open payment.html.
+2. Find:
+   const VENMO_USERNAME='YOUR_VENMO_BUSINESS_USERNAME';
+3. Replace YOUR_VENMO_BUSINESS_USERNAME with the real Venmo business username,
+   without the @ symbol.
+
+4. Find:
+   const VENMO_PROFILE_URL='https://venmo.com/u/YOUR_VENMO_BUSINESS_USERNAME';
+5. Replace the entire URL with the actual Venmo business-profile or payment URL.
+
+Current workflow:
+- Customer starts 3 days of local browser access.
+- After the initial period, the customer sends $9.99 through Venmo.
+- Customer enters the Venmo confirmation reference.
+- The site stores payment status as “payment pending.”
+- ReadySetPrep reviews and confirms the payment manually.
+
+Important limitations:
+- Venmo payments are not automatically verified.
+- Monthly payments are not automatically charged.
+- The static website does not securely enforce paid access.
+- A backend or payment platform integration will be needed for reliable
+  subscriptions, payment verification, cancellation, and access control.

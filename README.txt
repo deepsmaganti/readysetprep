@@ -467,3 +467,47 @@ LANDING PAGE CLEANUP
 PROGRESS BUTTON UPDATE
 - Changed the Progress card action from the white secondary style to the blue primary style.
 - All three landing-page options now have equal visual emphasis.
+
+
+PAYMENT AND SUBSCRIPTION PAGE
+- Added payment.html.
+- Plan:
+  - 3-day free trial
+  - $9.99 per month after the trial
+  - monthly renewal until canceled
+- Landing-page Get Started and hero buttons now open the payment page.
+- Creating or logging into a browser profile now continues to payment.html.
+- Payment page includes:
+  - name and email
+  - card number, expiration, CVC, and ZIP fields
+  - trial and renewal disclosure
+  - billing-start date
+  - trial confirmation screen
+- Static-site safety:
+  - card information is never stored
+  - no real charge is processed
+  - only local trial/subscription status is saved
+- Real production billing still requires a secure payment provider, webhooks,
+  server-side subscription validation, cancellation management, and account
+  entitlements.
+
+
+LANDING PAGE PAYMENT COPY UPDATE
+- Removed all free-trial and monthly-price details from the landing page.
+- Replaced trial-focused calls to action with the neutral label “Get started.”
+- Trial and pricing details remain only on payment.html.
+
+
+MANUAL VENMO PAYMENT WORKFLOW
+- Removed the card-entry form.
+- Added a manual Venmo monthly-payment workflow:
+  - 3 days of initial access
+  - $9.99 monthly payment through Venmo
+  - no automatic charging or renewal
+  - Venmo username, link, amount, and payment note displayed
+  - customer records a Venmo confirmation reference
+  - payment status changes to “payment pending”
+- The static site does not automatically verify payments or activate monthly
+  access after payment.
+- Update the Venmo username and URL in payment.html before deployment.
+- See VENMO_SETUP.txt.

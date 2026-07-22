@@ -302,3 +302,38 @@ PROGRESS BUTTON STYLE CHECK
 - Test Preparation action uses btn-primary
 - Skill Practice action uses btn-primary
 - JavaScript syntax check: PASSED
+
+
+PAYMENT PAGE CHECK
+- 3-day free trial displayed
+- $9.99 monthly price displayed
+- Auto-renewal disclosure displayed
+- Future billing date calculated
+- Card details not stored
+- Local subscription status stored
+- Landing CTA links to payment page
+- Login redirects to payment page
+- Privacy notice updated
+- JavaScript syntax checks: PASSED
+
+
+LANDING PAGE TRIAL COPY CHECK
+- No 3-day free-trial wording on landing page
+- No $9.99 monthly wording on landing page
+- Landing CTA uses “Get started”
+- Payment page retains trial and pricing details
+- JavaScript syntax check: PASSED
+
+
+MANUAL VENMO PAYMENT CHECK
+- Card number field removed
+- Expiration field removed
+- CVC field removed
+- Billing ZIP field removed
+- Automatic-renewal wording removed
+- Manual $9.99 Venmo payment instructions added
+- Unique payment note generated from email
+- Venmo confirmation-reference field added
+- Payment pending state added
+- Card details are not collected or stored
+- JavaScript syntax check: PASSED

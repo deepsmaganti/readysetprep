@@ -1,0 +1,632 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Start ReadySetPrep access and continue monthly through Venmo.">
+<title>Get Started — ReadySetPrep</title>
+<style>
+:root{
+  --blue:#315fba;
+  --blue-dark:#244b94;
+  --venmo:#008cff;
+  --teal:#118b7e;
+  --teal-soft:#e9f7f4;
+  --page:#f7f9fc;
+  --card:#fff;
+  --text:#182230;
+  --muted:#667085;
+  --line:#d8dee8;
+  --warning:#9a6700;
+  --warning-soft:#fff7df;
+  --danger:#b42318;
+}
+*{box-sizing:border-box}
+body{
+  min-height:100vh;
+  margin:0;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 86% 8%,rgba(0,140,255,.10),transparent 28%),
+    radial-gradient(circle at 8% 92%,rgba(49,95,186,.09),transparent 26%),
+    var(--page);
+}
+a{text-decoration:none;color:inherit}
+button,input{font:inherit}
+.wrap{
+  width:min(960px,calc(100% - 28px));
+  margin:0 auto;
+  padding:32px 0;
+}
+.brand{
+  display:inline-block;
+  margin-bottom:25px;
+  color:var(--blue);
+  font-size:22px;
+  font-weight:900;
+  letter-spacing:-.03em;
+}
+.layout{
+  display:grid;
+  grid-template-columns:.9fr 1.1fr;
+  gap:24px;
+  align-items:start;
+}
+.summary,
+.panel,
+.status-card{
+  border:1px solid var(--line);
+  border-radius:20px;
+  background:var(--card);
+  box-shadow:0 16px 44px rgba(24,49,83,.08);
+}
+.summary{
+  position:sticky;
+  top:24px;
+  padding:26px;
+}
+.summary h1{
+  margin:0 0 8px;
+  font-size:34px;
+  line-height:1.1;
+  letter-spacing:-.035em;
+}
+.summary>p{
+  margin:0;
+  color:var(--muted);
+  line-height:1.6;
+}
+.price{
+  margin:23px 0 18px;
+  padding:18px;
+  border:1px solid var(--line);
+  border-radius:15px;
+  background:#f8fafc;
+}
+.price-row{
+  display:flex;
+  align-items:flex-end;
+  justify-content:space-between;
+  gap:15px;
+}
+.price-row span{color:var(--muted);font-size:13px}
+.price-row b{font-size:28px}
+.trial{
+  margin-top:8px;
+  color:var(--teal);
+  font-size:13px;
+  font-weight:850;
+}
+.features{
+  display:grid;
+  gap:11px;
+  margin-top:19px;
+}
+.feature{
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+  color:#526176;
+  font-size:14px;
+}
+.check{
+  width:21px;
+  height:21px;
+  flex:0 0 21px;
+  display:grid;
+  place-items:center;
+  border-radius:50%;
+  background:var(--teal-soft);
+  color:var(--teal);
+  font-size:11px;
+  font-weight:900;
+}
+.panel{padding:28px}
+.panel h2{margin:0 0 5px;font-size:28px}
+.subtitle{margin:0 0 21px;color:var(--muted);font-size:14px}
+.field{margin-bottom:14px}
+.field label{
+  display:block;
+  margin-bottom:6px;
+  font-size:13px;
+  font-weight:850;
+}
+.field input{
+  width:100%;
+  min-height:48px;
+  padding:11px 12px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  color:var(--text);
+  background:#fff;
+}
+.field input:focus{
+  outline:3px solid rgba(49,95,186,.13);
+  border-color:var(--blue);
+}
+.terms{
+  display:flex;
+  align-items:flex-start;
+  gap:9px;
+  margin:4px 0 14px;
+  color:#526176;
+  font-size:13px;
+  line-height:1.5;
+}
+.terms input{margin-top:3px}
+.message{
+  min-height:20px;
+  margin:0 0 8px;
+  color:var(--danger);
+  font-size:13px;
+}
+.btn{
+  min-height:49px;
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  padding:10px 17px;
+  border:1px solid transparent;
+  border-radius:11px;
+  font-weight:900;
+  cursor:pointer;
+}
+.btn-block{width:100%}
+.btn-primary{background:var(--blue);color:#fff}
+.btn-primary:hover{background:var(--blue-dark)}
+.btn-secondary{background:#fff;border-color:var(--line);color:var(--text)}
+.btn-venmo{background:var(--venmo);color:#fff}
+.btn-venmo:hover{filter:brightness(.94)}
+.button-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:9px;
+  margin-top:16px;
+}
+.note{
+  margin-top:17px;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:11px;
+  background:#f8fafc;
+  color:var(--muted);
+  font-size:12px;
+  line-height:1.55;
+}
+.status-card{
+  display:none;
+  padding:29px;
+}
+.status-icon{
+  width:58px;
+  height:58px;
+  display:grid;
+  place-items:center;
+  margin-bottom:16px;
+  border-radius:50%;
+  background:var(--teal-soft);
+  color:var(--teal);
+  font-size:27px;
+  font-weight:900;
+}
+.status-card h2{margin:0 0 7px;font-size:29px}
+.status-card>p{margin:0;color:var(--muted);line-height:1.6}
+.status-box{
+  margin-top:18px;
+  padding:17px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#f8fafc;
+}
+.status-box span{display:block;color:var(--muted);font-size:12px}
+.status-box b{display:block;margin-top:4px;font-size:18px}
+.venmo-box{
+  margin-top:18px;
+  padding:19px;
+  border:1px solid #b9ddff;
+  border-radius:15px;
+  background:#f0f8ff;
+}
+.venmo-title{
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:14px;
+}
+.venmo-title h3{margin:0;font-size:19px}
+.venmo-badge{
+  padding:5px 8px;
+  border-radius:999px;
+  background:var(--venmo);
+  color:#fff;
+  font-size:11px;
+  font-weight:900;
+}
+.payment-row{
+  display:flex;
+  justify-content:space-between;
+  gap:14px;
+  padding:11px 0;
+  border-bottom:1px solid #d5e9fa;
+}
+.payment-row:last-of-type{border-bottom:0}
+.payment-row span{color:var(--muted);font-size:13px}
+.payment-row b{text-align:right}
+.handle{
+  color:var(--venmo);
+  word-break:break-word;
+}
+.warning{
+  margin-top:15px;
+  padding:12px;
+  border:1px solid #f2d58a;
+  border-radius:11px;
+  background:var(--warning-soft);
+  color:var(--warning);
+  font-size:12px;
+  line-height:1.55;
+}
+.pending{
+  border-color:#f2d58a;
+  background:#fffdf5;
+}
+.pending .status-icon{
+  background:var(--warning-soft);
+  color:var(--warning);
+}
+.small{font-size:12px;color:var(--muted)}
+@media(max-width:800px){
+  .layout{grid-template-columns:1fr}
+  .summary{position:static}
+}
+@media(max-width:560px){
+  .wrap{width:min(100% - 20px,960px);padding-top:22px}
+  .summary h1{font-size:30px}
+  .button-row{display:grid}
+  .button-row .btn{width:100%}
+}
+</style>
+</head>
+<body>
+<main class="wrap">
+  <a class="brand" href="index.html">ReadySetPrep</a>
+
+  <section class="layout" id="enrollmentView">
+    <aside class="summary">
+      <h1>Get started with ReadySetPrep</h1>
+      <p>Begin with 3 days of access, then continue monthly using Venmo.</p>
+
+      <div class="price">
+        <div class="price-row">
+          <span>Monthly access</span>
+          <b>$9.99</b>
+        </div>
+        <div class="trial">First 3 days free</div>
+      </div>
+
+      <div class="features">
+        <div class="feature"><span class="check">✓</span><span>Practice tests and focused skill work</span></div>
+        <div class="feature"><span class="check">✓</span><span>Answer explanations and review tools</span></div>
+        <div class="feature"><span class="check">✓</span><span>Assessment history and progress reports</span></div>
+        <div class="feature"><span class="check">✓</span><span>Monthly payment through Venmo</span></div>
+      </div>
+    </aside>
+
+    <section class="panel">
+      <h2>Start your access</h2>
+      <p class="subtitle">No payment information is needed to begin the 3-day period.</p>
+
+      <form id="trialForm" novalidate>
+        <div class="field">
+          <label for="name">Student or parent name</label>
+          <input id="name" autocomplete="name" maxlength="60" required>
+        </div>
+
+        <div class="field">
+          <label for="email">Parent or guardian email</label>
+          <input id="email" type="email" autocomplete="email" required>
+        </div>
+
+        <label class="terms">
+          <input id="terms" type="checkbox">
+          <span>I understand that access continues after 3 days only after a separate $9.99 Venmo payment. Payments are not charged automatically.</span>
+        </label>
+
+        <p class="message" id="message" role="alert"></p>
+
+        <button class="btn btn-primary btn-block" type="submit">Start 3-day access</button>
+      </form>
+
+      <div class="note"><b>Manual Venmo setup:</b> after the first 3 days, the customer sends $9.99 to the ReadySetPrep Venmo business profile. Each payment provides one month of access. This static site cannot confirm Venmo payments automatically.</div>
+    </section>
+  </section>
+
+  <section class="status-card" id="trialActiveView">
+    <div class="status-icon">✓</div>
+    <h2>Your access is active</h2>
+    <p>You can use ReadySetPrep during the initial 3-day period.</p>
+
+    <div class="status-box">
+      <span>Access through</span>
+      <b id="trialEndDate"></b>
+    </div>
+
+    <div class="button-row">
+      <a class="btn btn-primary" href="practice.html">Continue to practice</a>
+      <button class="btn btn-secondary" id="showPaymentEarly" type="button">View monthly payment</button>
+    </div>
+  </section>
+
+  <section class="status-card" id="venmoPaymentView">
+    <div class="status-icon">V</div>
+    <h2>Continue monthly with Venmo</h2>
+    <p>Send the payment below from your Venmo account. Access is activated manually after the payment is reviewed.</p>
+
+    <div class="venmo-box">
+      <div class="venmo-title">
+        <h3>Venmo payment</h3>
+        <span class="venmo-badge">Venmo</span>
+      </div>
+
+      <div class="payment-row">
+        <span>Amount</span>
+        <b>$9.99</b>
+      </div>
+      <div class="payment-row">
+        <span>Send to</span>
+        <b class="handle" id="venmoHandle">@YOUR_VENMO_BUSINESS_USERNAME</b>
+      </div>
+      <div class="payment-row">
+        <span>Payment note</span>
+        <b id="paymentNote">RSP-MONTHLY</b>
+      </div>
+
+      <div class="button-row">
+        <a class="btn btn-venmo" id="openVenmo" href="#" target="_blank" rel="noopener">Open Venmo</a>
+        <button class="btn btn-secondary" id="copyHandle" type="button">Copy username</button>
+        <button class="btn btn-secondary" id="copyNote" type="button">Copy payment note</button>
+      </div>
+    </div>
+
+    <div class="warning"><b>Important:</b> this page cannot verify a Venmo payment. After paying, use the button below to mark the payment as submitted. ReadySetPrep must review the payment manually before access is considered confirmed.</div>
+
+    <div class="field" style="margin-top:18px">
+      <label for="venmoReference">Venmo transaction or confirmation reference</label>
+      <input id="venmoReference" placeholder="Enter the Venmo confirmation reference">
+    </div>
+
+    <p class="message" id="paymentMessage" role="alert"></p>
+
+    <div class="button-row">
+      <button class="btn btn-primary" id="markPaid" type="button">I sent the Venmo payment</button>
+      <a class="btn btn-secondary" href="index.html">Return home</a>
+    </div>
+  </section>
+
+  <section class="status-card pending" id="pendingView">
+    <div class="status-icon">…</div>
+    <h2>Payment submitted for review</h2>
+    <p>Your Venmo payment has been marked as submitted. ReadySetPrep must verify it manually.</p>
+
+    <div class="status-box">
+      <span>Payment reference</span>
+      <b id="pendingReference"></b>
+    </div>
+
+    <div class="button-row">
+      <a class="btn btn-secondary" href="index.html">Return home</a>
+      <button class="btn btn-secondary" id="changeReference" type="button">Update reference</button>
+    </div>
+
+    <p class="small" style="margin-top:16px">This static version does not automatically unlock or extend access after a Venmo payment.</p>
+  </section>
+</main>
+
+<script>
+const PROFILE_KEY='readysetprep:user:v1';
+const SUBSCRIPTION_KEY='readysetprep:subscription:v1';
+
+/*
+  SET THESE BEFORE DEPLOYMENT:
+  1. Replace YOUR_VENMO_BUSINESS_USERNAME with the real Venmo business username.
+  2. Replace the profile URL with the real Venmo business-profile/payment URL.
+*/
+const VENMO_USERNAME='YOUR_VENMO_BUSINESS_USERNAME';
+const VENMO_PROFILE_URL='https://venmo.com/u/YOUR_VENMO_BUSINESS_USERNAME';
+const MONTHLY_PRICE=9.99;
+const TRIAL_DAYS=3;
+
+function readJson(key,fallback){
+  try{
+    const value=JSON.parse(localStorage.getItem(key));
+    return value??fallback;
+  }catch(error){
+    return fallback;
+  }
+}
+function saveJson(key,value){
+  localStorage.setItem(key,JSON.stringify(value));
+}
+function formatDate(value){
+  return new Date(value).toLocaleDateString([],{
+    month:'long',
+    day:'numeric',
+    year:'numeric'
+  });
+}
+function normalizeName(value,email){
+  const clean=value.trim();
+  if(clean)return clean;
+  const local=(email.split('@')[0]||'Student').replace(/[._-]+/g,' ');
+  return local.replace(/\b\w/g,letter=>letter.toUpperCase());
+}
+function makePaymentNote(email){
+  const local=(email.split('@')[0]||'customer')
+    .replace(/[^a-z0-9]/gi,'')
+    .slice(0,12)
+    .toUpperCase();
+  return `RSP-${local||'MONTHLY'}`;
+}
+function currentSubscription(){
+  return readJson(SUBSCRIPTION_KEY,null);
+}
+function hideAllViews(){
+  document.getElementById('enrollmentView').style.display='none';
+  document.getElementById('trialActiveView').style.display='none';
+  document.getElementById('venmoPaymentView').style.display='none';
+  document.getElementById('pendingView').style.display='none';
+}
+function showView(id){
+  hideAllViews();
+  document.getElementById(id).style.display=id==='enrollmentView'?'grid':'block';
+}
+function trialIsActive(subscription){
+  if(!subscription?.trialEndsAt)return false;
+  return subscription.status==='trialing' &&
+    new Date(subscription.trialEndsAt).getTime()>Date.now();
+}
+function render(){
+  const subscription=currentSubscription();
+  const profile=readJson(PROFILE_KEY,null);
+
+  if(!subscription){
+    showView('enrollmentView');
+    if(profile){
+      document.getElementById('name').value=profile.name||'';
+      document.getElementById('email').value=profile.email||'';
+    }
+    return;
+  }
+
+  if(subscription.status==='payment_pending'){
+    showView('pendingView');
+    document.getElementById('pendingReference').textContent=
+      subscription.venmoReference||'Submitted without a reference';
+    return;
+  }
+
+  if(trialIsActive(subscription)){
+    showView('trialActiveView');
+    document.getElementById('trialEndDate').textContent=
+      formatDate(subscription.trialEndsAt);
+    return;
+  }
+
+  showVenmoPayment();
+}
+function showVenmoPayment(){
+  const profile=readJson(PROFILE_KEY,null);
+  const subscription=currentSubscription()||{};
+  const note=subscription.paymentNote||makePaymentNote(profile?.email||'');
+
+  showView('venmoPaymentView');
+  document.getElementById('venmoHandle').textContent=`@${VENMO_USERNAME}`;
+  document.getElementById('paymentNote').textContent=note;
+  document.getElementById('openVenmo').href=VENMO_PROFILE_URL;
+}
+async function copyText(text,button){
+  try{
+    await navigator.clipboard.writeText(text);
+    const original=button.textContent;
+    button.textContent='Copied';
+    setTimeout(()=>button.textContent=original,1300);
+  }catch(error){
+    window.prompt('Copy this value:',text);
+  }
+}
+
+document.getElementById('trialForm').addEventListener('submit',event=>{
+  event.preventDefault();
+
+  const name=document.getElementById('name').value.trim();
+  const email=document.getElementById('email').value.trim().toLowerCase();
+  const terms=document.getElementById('terms').checked;
+  const message=document.getElementById('message');
+
+  if(name.length<2){
+    message.textContent='Enter a name.';
+    return;
+  }
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    message.textContent='Enter a valid email address.';
+    return;
+  }
+  if(!terms){
+    message.textContent='Confirm the payment terms to continue.';
+    return;
+  }
+
+  const startedAt=new Date();
+  const endsAt=new Date(startedAt);
+  endsAt.setDate(endsAt.getDate()+TRIAL_DAYS);
+
+  saveJson(PROFILE_KEY,{
+    name:normalizeName(name,email),
+    email,
+    updatedAt:startedAt.toISOString()
+  });
+
+  saveJson(SUBSCRIPTION_KEY,{
+    status:'trialing',
+    paymentMethod:'venmo_manual',
+    trialStartedAt:startedAt.toISOString(),
+    trialEndsAt:endsAt.toISOString(),
+    accessUntil:endsAt.toISOString(),
+    monthlyPrice:MONTHLY_PRICE,
+    currency:'USD',
+    billingInterval:'month',
+    autoRenew:false,
+    paymentNote:makePaymentNote(email)
+  });
+
+  message.textContent='';
+  render();
+});
+
+document.getElementById('showPaymentEarly').addEventListener('click',showVenmoPayment);
+
+document.getElementById('copyHandle').addEventListener('click',event=>{
+  copyText(`@${VENMO_USERNAME}`,event.currentTarget);
+});
+document.getElementById('copyNote').addEventListener('click',event=>{
+  copyText(document.getElementById('paymentNote').textContent,event.currentTarget);
+});
+
+document.getElementById('markPaid').addEventListener('click',()=>{
+  const reference=document.getElementById('venmoReference').value.trim();
+  const message=document.getElementById('paymentMessage');
+
+  if(reference.length<4){
+    message.textContent='Enter the Venmo confirmation reference.';
+    return;
+  }
+
+  const subscription=currentSubscription()||{};
+  saveJson(SUBSCRIPTION_KEY,{
+    ...subscription,
+    status:'payment_pending',
+    paymentMethod:'venmo_manual',
+    venmoReference:reference,
+    paymentSubmittedAt:new Date().toISOString(),
+    monthlyPrice:MONTHLY_PRICE,
+    autoRenew:false
+  });
+
+  message.textContent='';
+  render();
+});
+
+document.getElementById('changeReference').addEventListener('click',()=>{
+  const subscription=currentSubscription()||{};
+  saveJson(SUBSCRIPTION_KEY,{
+    ...subscription,
+    status:'payment_due'
+  });
+  render();
+});
+
+render();
+</script>
+</body>
+</html>
