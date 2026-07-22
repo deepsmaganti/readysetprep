@@ -271,3 +271,34 @@ WORDMARK FONT CHECK
 - Remaining standalone site-mark R elements removed
 - Test top-bar wordmarks updated
 - JavaScript syntax checks: PASSED
+
+
+WORDMARK REVERT CHECK
+- Arvo font links removed
+- Slab-serif wordmark CSS removed
+- Previous sans-serif wordmark restored
+- Standalone R icons remain removed
+- JavaScript syntax checks: PASSED
+
+
+SIMPLE LANDING PAGE CHECK
+- Single concise hero
+- Three primary options
+- Compact current-content section
+- Login and local profile retained
+- Existing test and practice links preserved
+- JavaScript syntax check: PASSED
+
+
+AVAILABLE-NOW REMOVAL CHECK
+- Available now heading removed
+- Current ISEE content summary removed from landing page
+- Three primary landing-page options retained
+- JavaScript syntax check: PASSED
+
+
+PROGRESS BUTTON STYLE CHECK
+- Progress action uses btn-primary
+- Test Preparation action uses btn-primary
+- Skill Practice action uses btn-primary
+- JavaScript syntax check: PASSED

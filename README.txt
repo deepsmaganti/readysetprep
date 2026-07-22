@@ -439,3 +439,31 @@ READYSETPREP WORDMARK FONT
   - Lower Level test pages
   - active test top bars
 - Removed remaining standalone R marks from the practice and test home screens.
+
+
+WORDMARK REVERT
+- Switched the ReadySetPrep wordmark back to the previous sans-serif styling.
+- Removed the Arvo slab-serif font and related overrides.
+- Kept the standalone R icon removed, as previously requested.
+
+
+SIMPLIFIED LANDING PAGE
+- Reduced the landing page to:
+  - one short headline
+  - one sentence explaining ReadySetPrep
+  - three simple options: Test Preparation, Skill Practice, and Progress
+  - one compact Available now section
+  - minimal footer
+- Removed the detailed learning snapshot, multi-step explanation, statistics,
+  and other secondary content from the landing page.
+
+
+LANDING PAGE CLEANUP
+- Removed the entire Available now section from the landing page.
+- The landing page now ends after the three primary options:
+  Test Preparation, Skill Practice, and Progress.
+
+
+PROGRESS BUTTON UPDATE
+- Changed the Progress card action from the white secondary style to the blue primary style.
+- All three landing-page options now have equal visual emphasis.

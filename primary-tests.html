@@ -4,9 +4,6 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>ReadySetPrep — ISEE Practice</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Arvo:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{--ink:#182230;--muted:#667085;--line:#d0d5dd;--panel:#fff;--page:#f3f6fb;--brand:#3056a3;--brand2:#e9effb;--ok:#067647;--bad:#b42318;--warn:#b54708;--shadow:0 8px 30px rgba(16,24,40,.10);--teal:#0f8a83;--teal-soft:#e7f7f5;--green:#2f8f62;--green-soft:#eaf7ef;--purple:#7455c3;--purple-soft:#f0ebff;--gold:#b7791f;--gold-soft:#fff7df;--coral:#d95f4f;--coral-soft:#fff0ed}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink);background:var(--page);font-size:17px;line-height:1.5}
@@ -881,14 +878,6 @@ body{
 }
 
 
-/* ReadySetPrep slab-serif wordmark */
-.brand-wordmark,
-.site-name{
-  font-family:"Arvo","Rockwell","Roboto Slab",Georgia,serif!important;
-  font-weight:400!important;
-  letter-spacing:-.045em!important;
-  line-height:1!important;
-}
 
 </style>
 </head>
@@ -1467,7 +1456,7 @@ function home(){
  const assessmentCount=loadAssessmentHistory().length;
  document.getElementById('app').innerHTML=`<main class="container"><section class="card hero home-hero">
   <div class="site-brand-row">
-   <div><div class="site-name brand-wordmark">ReadySetPrep</div><div class="site-tagline">Primary 2 practice tests</div></div>
+   <div><div class="site-name">ReadySetPrep</div><div class="site-tagline">Primary 2 practice tests</div></div>
   </div>
 
   <div class="test-heading">Choose a Primary 2 practice test</div>
@@ -1639,7 +1628,7 @@ function intro(){
  document.getElementById('beginSection').onclick=()=>{state.screen=sec==='auditory'?'audio':'test';state.qIndex=0;save();render()};
  document.getElementById('backHome').onclick=goHome;
 }
-function topbar(sec){return `<header class="topbar"><div class="topbar-inner"><button class="topbar-home" onclick="goMain()" aria-label="Return to ReadySetPrep home">⌂ Home</button><div class="brand"><span class="brand-wordmark">ReadySetPrep</span> · ${currentTestInfo().label}</div><div class="section-title">${labels[sec]}</div><div class="timer ${state.timed&&state.timeLeft[sec]<=60?'warn':''}">${state.timed?fmtTime(state.timeLeft[sec]):'Untimed'}</div></div></header>`}
+function topbar(sec){return `<header class="topbar"><div class="topbar-inner"><button class="topbar-home" onclick="goMain()" aria-label="Return to ReadySetPrep home">⌂ Home</button><div class="brand"><span>ReadySetPrep</span> · ${currentTestInfo().label}</div><div class="section-title">${labels[sec]}</div><div class="timer ${state.timed&&state.timeLeft[sec]<=60?'warn':''}">${state.timed?fmtTime(state.timeLeft[sec]):'Untimed'}</div></div></header>`}
 
 function audioScreen(){
  stopTimer(); const sec='auditory'; const erbAuditory=usesErbAuditoryPattern();

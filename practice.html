@@ -4,9 +4,6 @@
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
 <title>Practice Library — ReadySetPrep</title>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Arvo:wght@400;700&display=swap" rel="stylesheet">
 <style>
 :root{--ink:#182230;--muted:#667085;--line:#d0d5dd;--panel:#fff;--page:#f3f6fb;--brand:#3056a3;--brand2:#e9effb;--ok:#067647;--bad:#b42318;--warn:#b54708;--shadow:0 8px 30px rgba(16,24,40,.10);--teal:#0f8a83;--teal-soft:#e7f7f5;--green:#2f8f62;--green-soft:#eaf7ef;--purple:#7455c3;--purple-soft:#f0ebff;--gold:#b7791f;--gold-soft:#fff7df;--coral:#d95f4f;--coral-soft:#fff0ed}
 *{box-sizing:border-box}body{margin:0;font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;color:var(--ink);background:var(--page);font-size:17px;line-height:1.5}
@@ -291,14 +288,6 @@ button,input{font:inherit}.app{min-height:100vh}.topbar{position:sticky;top:0;z-
   text-decoration:none;font-weight:800;font-size:13px
 }
 
-/* ReadySetPrep slab-serif wordmark */
-.brand-wordmark,
-.site-name{
-  font-family:"Arvo","Rockwell","Roboto Slab",Georgia,serif!important;
-  font-weight:400!important;
-  letter-spacing:-.045em!important;
-  line-height:1!important;
-}
 
 </style>
 </head>
@@ -539,7 +528,7 @@ function home(){
  if(true){
    const blueprint=level.blueprint.map(x=>`<div class="blueprint-item"><b>${escapeHtml(x.name)}</b><span>${x.unscored?'Unscored writing sample':`${x.questions} questions`} · ${x.minutes} minutes</span></div>`).join('');
    document.getElementById('app').innerHTML=`<main class="container"><section class="card hero home-hero">
-     <div class="site-brand-row"><div><div class="site-name brand-wordmark">ReadySetPrep</div><div class="site-tagline">ISEE practice for every level</div></div></div>
+     <div class="site-brand-row"><div><div class="site-name">ReadySetPrep</div><div class="site-tagline">ISEE practice for every level</div></div></div>
      <div class="level-heading">Choose an ISEE level</div><div class="level-picker">${levelCards}</div>
      <div class="level-overview" style="border-top:5px solid ${level.accent}">
        <span class="badge" style="background:${level.soft};color:${level.accent}">${escapeHtml(level.subtitle)}</span>
@@ -573,7 +562,7 @@ function home(){
  }
 
  document.getElementById('app').innerHTML=`<main class="container"><section class="card hero home-hero">
- <div class="site-brand-row"><div><div class="site-name brand-wordmark">ReadySetPrep</div><div class="site-tagline">ISEE practice for every level</div></div></div>
+ <div class="site-brand-row"><div><div class="site-name">ReadySetPrep</div><div class="site-tagline">ISEE practice for every level</div></div></div>
  <div class="level-heading">Choose an ISEE level</div><div class="level-picker">${levelCards}</div>
  <div class="practice-launch-bar"><div><b>Practice Exercises</b><span>Build mastery one concept at a time</span></div><button class="btn btn-primary" id="openPracticeExercises">Open exercises</button></div>
  <div class="test-heading">Choose a Primary 2 practice test</div>
@@ -841,7 +830,7 @@ function intro(){
  document.getElementById('backHome').onclick=goHome;
 }
 
-function topbar(sec){return `<header class="topbar"><div class="topbar-inner"><button class="topbar-home" onclick="goHome()" aria-label="Return to ReadySetPrep home">⌂ Home</button><div class="brand"><span class="brand-wordmark">ReadySetPrep</span> · ${currentTestInfo().label}</div><div class="section-title">${labels[sec]}</div><div class="timer ${state.timed&&state.timeLeft[sec]<=60?'warn':''}">${state.timed?fmtTime(state.timeLeft[sec]):'Untimed'}</div></div></header>`}
+function topbar(sec){return `<header class="topbar"><div class="topbar-inner"><button class="topbar-home" onclick="goHome()" aria-label="Return to ReadySetPrep home">⌂ Home</button><div class="brand"><span>ReadySetPrep</span> · ${currentTestInfo().label}</div><div class="section-title">${labels[sec]}</div><div class="timer ${state.timed&&state.timeLeft[sec]<=60?'warn':''}">${state.timed?fmtTime(state.timeLeft[sec]):'Untimed'}</div></div></header>`}
 
 function audioScreen(){
  stopTimer(); const sec='auditory';
