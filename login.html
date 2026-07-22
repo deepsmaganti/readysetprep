@@ -1,0 +1,241 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="description" content="Log in to ReadySetPrep.">
+<title>Log in — ReadySetPrep</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Arvo:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --blue:#315fba;
+  --blue-dark:#244b94;
+  --teal:#118b7e;
+  --teal-soft:#e9f7f4;
+  --page:#f7f9fc;
+  --text:#182230;
+  --muted:#667085;
+  --line:#d8dee8;
+  --bad:#b42318;
+}
+*{box-sizing:border-box}
+body{
+  min-height:100vh;
+  margin:0;
+  display:grid;
+  place-items:center;
+  padding:24px;
+  font-family:Inter,ui-sans-serif,system-ui,-apple-system,"Segoe UI",Arial,sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 88% 8%,rgba(17,139,126,.14),transparent 28%),
+    radial-gradient(circle at 10% 90%,rgba(49,95,186,.10),transparent 26%),
+    var(--page);
+}
+.layout{
+  width:min(920px,100%);
+  display:grid;
+  grid-template-columns:1fr 420px;
+  gap:34px;
+  align-items:center;
+}
+.brand{
+  display:inline-flex;
+  align-items:center;
+  gap:10px;
+  color:var(--blue);
+  font-weight:900;
+  font-size:21px;
+  text-decoration:none;
+}
+.intro h1{
+  margin:28px 0 12px;
+  font-size:47px;
+  line-height:1.04;
+  letter-spacing:-.04em;
+}
+.intro p{max-width:460px;margin:0;color:var(--muted);font-size:17px}
+.list{display:grid;gap:10px;margin-top:24px}
+.list div{display:flex;align-items:center;gap:10px;color:#526176}
+.check{
+  width:27px;height:27px;border-radius:9px;
+  display:grid;place-items:center;
+  background:var(--teal-soft);color:var(--teal);
+  font-size:12px;font-weight:900;
+}
+.panel{
+  padding:29px;
+  border:1px solid var(--line);
+  border-radius:22px;
+  background:white;
+  box-shadow:0 20px 56px rgba(24,49,83,.13);
+}
+.panel h2{margin:0 0 5px;font-size:28px}
+.subtitle{margin:0 0 20px;color:var(--muted);font-size:14px}
+.tabs{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:5px;
+  padding:5px;
+  border-radius:11px;
+  background:#f1f5f9;
+  margin-bottom:18px;
+}
+.tab{
+  min-height:39px;border:0;border-radius:8px;
+  background:transparent;color:#526176;
+  font-weight:850;cursor:pointer;
+}
+.tab.active{background:white;color:var(--blue);box-shadow:0 2px 8px rgba(24,49,83,.08)}
+.field{margin-bottom:14px}
+.field label{display:block;margin-bottom:6px;font-size:13px;font-weight:850}
+.field input{
+  width:100%;min-height:48px;padding:11px 12px;
+  border:1px solid var(--line);border-radius:10px;
+  font:inherit;color:var(--text);
+}
+.field input:focus{outline:3px solid rgba(49,95,186,.13);border-color:var(--blue)}
+.hidden{display:none}
+.btn{
+  width:100%;min-height:48px;border-radius:10px;
+  border:1px solid transparent;
+  font:inherit;font-weight:900;cursor:pointer;
+}
+.btn-primary{background:var(--blue);color:white}
+.btn-primary:hover{background:var(--blue-dark)}
+.btn-secondary{margin-top:9px;background:white;border-color:var(--line);color:var(--text)}
+.message{min-height:20px;margin:8px 0;color:var(--bad);font-size:13px}
+.note{
+  margin-top:15px;padding:11px;border-radius:10px;
+  background:#f8fafc;border:1px solid var(--line);
+  color:var(--muted);font-size:12px;line-height:1.5;
+}
+.back{display:inline-block;margin-top:16px;color:var(--blue);font-size:13px;font-weight:850}
+@media(max-width:800px){
+  .layout{grid-template-columns:1fr;max-width:500px}
+  .intro{padding:4px}
+  .intro h1{font-size:39px}
+  .list{display:none}
+}
+
+/* ReadySetPrep slab-serif wordmark */
+.brand-wordmark,
+.site-name{
+  font-family:"Arvo","Rockwell","Roboto Slab",Georgia,serif!important;
+  font-weight:400!important;
+  letter-spacing:-.045em!important;
+  line-height:1!important;
+}
+
+</style>
+</head>
+<body>
+<main class="layout">
+  <section class="intro">
+    <a class="brand" href="index.html"><span class="brand-wordmark">ReadySetPrep</span></a>
+    <h1>Keep learning in one place.</h1>
+    <p>Create a simple browser profile to personalize the experience and quickly return to saved learning progress.</p>
+    <div class="list">
+      <div><span class="check">✓</span><span>Personalized landing page</span></div>
+      <div><span class="check">✓</span><span>Quick access to learning history</span></div>
+      <div><span class="check">✓</span><span>Progress stays on this device</span></div>
+    </div>
+  </section>
+
+  <section class="panel">
+    <h2 id="title">Log in</h2>
+    <p class="subtitle" id="subtitle">Use the browser profile saved on this device.</p>
+
+    <div class="tabs">
+      <button class="tab active" id="loginTab" type="button">Log in</button>
+      <button class="tab" id="createTab" type="button">Create profile</button>
+    </div>
+
+    <form id="form" novalidate>
+      <div class="field hidden" id="nameField">
+        <label for="name">Student or parent name</label>
+        <input id="name" maxlength="50" autocomplete="name">
+      </div>
+      <div class="field">
+        <label for="email">Parent or guardian email</label>
+        <input id="email" type="email" autocomplete="email" required>
+      </div>
+      <div class="field">
+        <label for="password">Password</label>
+        <input id="password" type="password" autocomplete="current-password" minlength="6" required>
+      </div>
+      <p class="message" id="message" role="alert"></p>
+      <button class="btn btn-primary" id="submit" type="submit">Log in</button>
+      <button class="btn btn-secondary" id="guest" type="button">Continue without logging in</button>
+    </form>
+
+    <div class="note"><b>Static-site preview:</b> the name and email are saved only in this browser. The password is never stored. Secure production login will require a backend authentication service.</div>
+    <a class="back" href="index.html">← Back to ReadySetPrep</a>
+  </section>
+</main>
+
+<script>
+const PROFILE_KEY='readysetprep:user:v1';
+let mode='login';
+
+function readProfile(){
+  try{return JSON.parse(localStorage.getItem(PROFILE_KEY))}
+  catch(error){return null}
+}
+function formatName(value,email){
+  if(value.trim())return value.trim();
+  const local=(email.split('@')[0]||'Student').replace(/[._-]+/g,' ');
+  return local.replace(/\b\w/g,letter=>letter.toUpperCase());
+}
+function setMode(next){
+  mode=next;
+  const creating=mode==='create';
+  document.getElementById('loginTab').classList.toggle('active',!creating);
+  document.getElementById('createTab').classList.toggle('active',creating);
+  document.getElementById('nameField').classList.toggle('hidden',!creating);
+  document.getElementById('title').textContent=creating?'Create profile':'Log in';
+  document.getElementById('subtitle').textContent=creating?'Save a simple profile on this device.':'Use the browser profile saved on this device.';
+  document.getElementById('submit').textContent=creating?'Create profile':'Log in';
+  document.getElementById('message').textContent='';
+}
+document.getElementById('loginTab').addEventListener('click',()=>setMode('login'));
+document.getElementById('createTab').addEventListener('click',()=>setMode('create'));
+document.getElementById('guest').addEventListener('click',()=>location.href='index.html');
+
+document.getElementById('form').addEventListener('submit',event=>{
+  event.preventDefault();
+  const email=document.getElementById('email').value.trim().toLowerCase();
+  const password=document.getElementById('password').value;
+  const name=document.getElementById('name').value;
+  const message=document.getElementById('message');
+
+  if(!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)){
+    message.textContent='Enter a valid email address.';
+    return;
+  }
+  if(password.length<6){
+    message.textContent='Use at least 6 characters.';
+    return;
+  }
+
+  const existing=readProfile();
+  if(mode==='login'&&existing?.email&&existing.email.toLowerCase()!==email){
+    message.textContent='This browser profile uses a different email. Choose Create profile to replace it.';
+    return;
+  }
+
+  localStorage.setItem(PROFILE_KEY,JSON.stringify({
+    name:formatName(mode==='create'?name:(existing?.name||''),email),
+    email,
+    updatedAt:new Date().toISOString()
+  }));
+  location.href='index.html';
+});
+
+const existing=readProfile();
+if(existing?.email)document.getElementById('email').value=existing.email;
+</script>
+</body>
+</html>

@@ -224,3 +224,50 @@ PRIMARY 2 AUDITORY SCOPE CORRECTION
 - Question and answer-choice text remains visible
 - Auto-read of auditory questions preserved
 - Post-test transcript preserved
+
+
+LANDING PAGE AND LOGIN CHECK
+- New responsive landing page
+- Concise Primary 2, Lower Level, and Concept Practice cards
+- Local assessment summary
+- Login and Create profile experience
+- Password not stored
+- Existing practice hub preserved as practice.html
+- Direct assessment-history links supported
+- Privacy notice updated
+- JavaScript syntax checks: PASSED
+
+
+CLEAN LANDING PAGE CHECK
+- Responsive landing page
+- Responsive login page
+- Primary 2, Lower Level, and Concept Practice links
+- Direct assessment-history links
+- Local browser profile
+- Password not stored
+- JavaScript syntax checks: PASSED
+
+
+GENERIC LANDING PAGE CHECK
+- Generic learning-platform headline
+- Generic test preparation, skill practice, and progress sections
+- Current ISEE content clearly labeled as available now
+- Login language updated to broader learning
+- Existing practice links preserved
+- JavaScript syntax checks: PASSED
+
+
+BRAND WORDMARK CHECK
+- Standalone R logo removed from landing page
+- Standalone R logo removed from login page
+- ReadySetPrep wordmark retained
+- JavaScript syntax checks: PASSED
+
+
+WORDMARK FONT CHECK
+- Arvo web font link added
+- Slab-serif fallback stack added
+- Wordmark styling applied to all major pages
+- Remaining standalone site-mark R elements removed
+- Test top-bar wordmarks updated
+- JavaScript syntax checks: PASSED

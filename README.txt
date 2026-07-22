@@ -376,3 +376,66 @@ PRIMARY 2 AUDITORY — ERB-STYLE PRESENTATION FOR ALL TESTS
   - automatically read each auditory question and its answer choices aloud
   - omit the passage replay control while the student is answering questions
 - The passage transcript remains available only after completion for review.
+
+
+NEW LANDING PAGE AND LOGIN
+- index.html is now a concise ReadySetPrep product landing page.
+- The previous all-level selector and concept-practice hub is preserved as
+  practice.html.
+- The landing page includes:
+  - clear product positioning
+  - Primary 2, Lower Level, and Concept Practice entry points
+  - a three-step explanation of the practice workflow
+  - local assessment counts and the most recent completed practice
+  - direct links to each level's complete assessment history
+- login.html provides Log in and Create profile screens.
+- The current login is a static-site browser-profile demonstration:
+  - display name and email are stored locally
+  - passwords are never stored
+  - no real user account or server authentication is created
+- A secure backend identity provider is still required for production.
+- primary-tests.html?view=history and lower-tests.html?view=history now open
+  their assessment history screens directly.
+
+
+CLEAN LANDING PAGE REDESIGN
+- Simplified the landing page with:
+  - one clear headline
+  - one-sentence product explanation
+  - three direct practice choices
+  - a concise three-step workflow
+  - browser-based assessment summary
+- Reduced visual clutter and removed unnecessary marketing copy.
+- Redesigned the login page to match the landing-page visual system.
+- Login remains a local browser-profile demonstration; no password is stored.
+
+
+GENERIC LANDING PAGE
+- Repositioned ReadySetPrep as a broader learning platform rather than an
+  ISEE-only website.
+- The landing page now centers on:
+  - test preparation
+  - skill practice
+  - progress and reports
+- Current ISEE content is shown under a clearly labeled “Available now”
+  section, while the main brand language remains generic.
+- Updated the login page language from practice-only to broader learning.
+
+
+BRAND HEADER UPDATE
+- Removed the standalone “R” icon shown before the ReadySetPrep name.
+- The wordmark now displays as ReadySetPrep only on the landing and login pages.
+
+
+READYSETPREP WORDMARK FONT
+- Updated the ReadySetPrep wordmark to use an Arvo-style slab-serif font,
+  similar to the supplied visual reference.
+- Added strong local fallbacks: Rockwell, Roboto Slab, Georgia, and serif.
+- Applied consistently to:
+  - landing page
+  - login page
+  - practice library
+  - Primary 2 test pages
+  - Lower Level test pages
+  - active test top bars
+- Removed remaining standalone R marks from the practice and test home screens.
