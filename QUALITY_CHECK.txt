@@ -49,9 +49,9 @@ COMPACT SELECTOR CHECK
 
 PRACTICE EXERCISE VALIDATION
 - Six ISEE levels included
-- Five concept modules per level
-- Five questions per concept
-- 150 original concept-practice questions total
+- Primary 2: 8 concept modules / 55 questions
+- Primary 3, Primary 4, Lower, Middle, Upper: 5 modules / 25 questions each
+- 180 original concept-practice questions total
 - Four choices and one validated answer per question
 - Immediate feedback and explanations
 - Local mastery tracking
@@ -336,4 +336,29 @@ MANUAL VENMO PAYMENT CHECK
 - Venmo confirmation-reference field added
 - Payment pending state added
 - Card details are not collected or stored
+- JavaScript syntax check: PASSED
+
+
+PRIMARY 2 READING PRACTICE CHECK
+- 6 new original reading passages
+- 30 new reading-comprehension questions
+- 3 new reading modules
+- 5 questions per passage
+- Story and informational text represented
+- Main idea, detail, inference, sequence, vocabulary, and cause/effect included
+- Passage grouping preserved
+- Passage titles displayed
+- Paragraph breaks preserved
+
+
+PRIMARY 2 FULL PASSAGE VALIDATION
+- Dedicated Full Passages section added to Primary 2 practice
+- 4 original full-length passages
+- 6 questions per passage / 24 new full-passage questions
+- Four choices per question
+- Passage-left / question-right layout on desktop
+- Responsive single-column layout on smaller screens
+- Immediate answer explanation
+- Completion score and review
+- Saved best score and attempt count
 - JavaScript syntax check: PASSED

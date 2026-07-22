@@ -144,8 +144,9 @@ PRACTICE EXERCISES
   - Lower
   - Middle
   - Upper
-- Every level currently includes five concept modules with five original
-  questions each: 25 exercises per level and 150 exercises altogether.
+- Primary 2 now includes eight concept modules and 55 original practice
+  questions. The other five levels retain five concept modules with five
+  questions each, for 180 original concept-practice questions altogether.
 - Primary concepts cover reading comprehension, vocabulary, number sense,
   operations, fractions, data, geometry, and measurement.
 - Lower, Middle, and Upper concepts cover verbal reasoning, reading
@@ -511,3 +512,43 @@ MANUAL VENMO PAYMENT WORKFLOW
   access after payment.
 - Update the Venmo username and URL in payment.html before deployment.
 - See VENMO_SETUP.txt.
+
+
+PRIMARY 2 READING COMPREHENSION EXPANSION
+- Added 6 new original Grade-2 reading passages and 30 new questions.
+- New Primary 2 Reading modules:
+  - Story Comprehension
+  - Informational Comprehension
+  - Inference & Sequence Passages
+- Each new module includes two longer passages with five questions per passage.
+- New question types include:
+  - main idea
+  - supporting details
+  - character inference
+  - cause and effect
+  - sequence
+  - vocabulary in context
+- Passage sets stay grouped so students answer the five questions for one
+  passage before moving to the next passage.
+- Passage titles and paragraph breaks are now displayed in concept practice.
+- All new passages, questions, choices, and explanations are original.
+
+
+PRIMARY 2 FULL PASSAGES
+- Added a dedicated “Full Passages” section inside Primary 2 Practice Exercises.
+- Added 4 new original full-length passages:
+  - The Blue Ribbon Box
+  - A Library for Seeds
+  - The Rainy-Day Map
+  - Why Some Birds Fly in a V
+- Each full passage has exactly 6 questions, matching the current Primary 2
+  reading-test pattern of 6 questions per passage.
+- Full Passage practice uses a test-style layout:
+  - full passage stays visible on the left
+  - one question is shown on the right
+  - four answer choices
+  - Previous / Next navigation
+  - immediate explanation after answering
+  - score and full answer review at completion
+- Full Passage scores/attempts are saved separately in localStorage.
+- All passages, questions, answer choices, and explanations are original.
