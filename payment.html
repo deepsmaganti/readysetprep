@@ -194,6 +194,86 @@ button,input{font:inherit}
   font-size:12px;
   line-height:1.55;
 }
+.access-code-box{
+  margin-top:18px;
+  padding:17px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#fbfcfe;
+}
+.access-code-box h3{
+  margin:0 0 5px;
+  font-size:18px;
+}
+.access-code-box p{
+  margin:0 0 13px;
+  color:var(--muted);
+  font-size:13px;
+  line-height:1.5;
+}
+.access-code-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:9px;
+}
+.access-code-row input{
+  min-height:46px;
+  width:100%;
+  padding:10px 12px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  text-transform:uppercase;
+}
+.access-code-row input:focus{
+  outline:3px solid rgba(49,95,186,.13);
+  border-color:var(--blue);
+}
+.access-code-message{
+  min-height:18px;
+  margin:8px 0 0!important;
+  font-size:12px!important;
+}
+.complimentary-badge{
+  display:inline-flex;
+  margin-bottom:10px;
+  padding:5px 9px;
+  border-radius:999px;
+  background:var(--teal-soft);
+  color:var(--teal);
+  font-size:12px;
+  font-weight:900;
+}
+.approval-box{
+  margin-top:18px;
+  padding:17px;
+  border:1px solid #f2d58a;
+  border-radius:14px;
+  background:var(--warning-soft);
+}
+.approval-box h3{margin:0 0 6px;font-size:18px}
+.approval-box p{margin:0;color:var(--warning);font-size:13px;line-height:1.55}
+.approval-code-row{
+  display:grid;
+  grid-template-columns:minmax(0,1fr) auto;
+  gap:9px;
+  margin-top:14px;
+}
+.approval-code-row input{
+  min-height:46px;
+  width:100%;
+  padding:10px 12px;
+  border:1px solid var(--line);
+  border-radius:10px;
+  text-transform:uppercase;
+}
+@media(max-width:560px){
+  .approval-code-row{grid-template-columns:1fr}
+}
+
+@media(max-width:560px){
+  .access-code-row{grid-template-columns:1fr}
+}
+
 .status-card{
   display:none;
   padding:29px;
@@ -291,6 +371,7 @@ button,input{font:inherit}
 <body>
 <main class="wrap">
   <a class="brand" href="index.html">ReadySetPrep</a>
+  <a href="contact.html" style="float:right;margin-top:5px;color:var(--blue);font-size:13px;font-weight:850">Contact</a>
 
   <section class="layout" id="enrollmentView">
     <aside class="summary">
@@ -338,6 +419,18 @@ button,input{font:inherit}
         <button class="btn btn-primary btn-block" type="submit">Start 3-day access</button>
       </form>
 
+      <div class="access-code-box">
+        <h3>Have an access code?</h3>
+        <p>Enter a complimentary access code to unlock all ReadySetPrep tests and practice without payment.</p>
+        <form class="access-code-form">
+          <div class="access-code-row">
+            <input class="access-code-input" autocomplete="off" spellcheck="false" placeholder="Enter access code" aria-label="Access code">
+            <button class="btn btn-secondary" type="submit">Apply code</button>
+          </div>
+          <p class="access-code-message" role="alert"></p>
+        </form>
+      </div>
+
       <div class="note"><b>Manual Venmo setup:</b> after the first 3 days, the customer sends $9.99 to the ReadySetPrep Venmo business profile. Each payment provides one month of access. This static site cannot confirm Venmo payments automatically.</div>
     </section>
   </section>
@@ -356,6 +449,19 @@ button,input{font:inherit}
       <a class="btn btn-primary" href="practice.html">Continue to practice</a>
       <button class="btn btn-secondary" id="showPaymentEarly" type="button">View monthly payment</button>
     </div>
+
+      <div class="access-code-box">
+        <h3>Have an access code?</h3>
+        <p>Enter a complimentary access code to unlock all ReadySetPrep tests and practice without payment.</p>
+        <form class="access-code-form">
+          <div class="access-code-row">
+            <input class="access-code-input" autocomplete="off" spellcheck="false" placeholder="Enter access code" aria-label="Access code">
+            <button class="btn btn-secondary" type="submit">Apply code</button>
+          </div>
+          <p class="access-code-message" role="alert"></p>
+        </form>
+      </div>
+
   </section>
 
   <section class="status-card" id="venmoPaymentView">
@@ -402,6 +508,19 @@ button,input{font:inherit}
       <button class="btn btn-primary" id="markPaid" type="button">I sent the Venmo payment</button>
       <a class="btn btn-secondary" href="index.html">Return home</a>
     </div>
+
+      <div class="access-code-box">
+        <h3>Have an access code?</h3>
+        <p>Enter a complimentary access code to unlock all ReadySetPrep tests and practice without payment.</p>
+        <form class="access-code-form">
+          <div class="access-code-row">
+            <input class="access-code-input" autocomplete="off" spellcheck="false" placeholder="Enter access code" aria-label="Access code">
+            <button class="btn btn-secondary" type="submit">Apply code</button>
+          </div>
+          <p class="access-code-message" role="alert"></p>
+        </form>
+      </div>
+
   </section>
 
   <section class="status-card pending" id="pendingView">
@@ -420,6 +539,68 @@ button,input{font:inherit}
     </div>
 
     <p class="small" style="margin-top:16px">This static version does not automatically unlock or extend access after a Venmo payment.</p>
+
+      <div class="access-code-box">
+        <h3>Have an access code?</h3>
+        <p>Enter a complimentary access code to unlock all ReadySetPrep tests and practice without payment.</p>
+        <form class="access-code-form">
+          <div class="access-code-row">
+            <input class="access-code-input" autocomplete="off" spellcheck="false" placeholder="Enter access code" aria-label="Access code">
+            <button class="btn btn-secondary" type="submit">Apply code</button>
+          </div>
+          <p class="access-code-message" role="alert"></p>
+        </form>
+      </div>
+
+  </section>
+
+  <section class="status-card pending" id="approvalPendingView">
+    <div class="status-icon">…</div>
+    <h2>Approval required</h2>
+    <p>Your access-code request has been created, but full access will remain locked until it is approved.</p>
+
+    <div class="status-box">
+      <span>Requested access</span>
+      <b id="pendingAccessType">Complimentary access</b>
+    </div>
+
+    <div class="status-box">
+      <span>Request ID</span>
+      <b id="approvalRequestId"></b>
+    </div>
+
+    <div class="approval-box">
+      <h3>Send the approval request</h3>
+      <p>Use the button below to send the request directly to ReadySetPrep. After review, the administrator can provide the approval code.</p>
+      <div class="button-row">
+        <button class="btn btn-primary" id="emailApprovalRequest" type="button">Send approval request</button>
+        <a class="btn btn-secondary" href="index.html">Return home</a>
+      </div>
+
+      <div class="approval-code-row">
+        <input id="adminApprovalCode" autocomplete="off" spellcheck="false" placeholder="Enter approval code">
+        <button class="btn btn-secondary" id="applyApprovalCode" type="button">Approve access</button>
+      </div>
+      <p class="message" id="approvalMessage" role="alert"></p>
+    </div>
+  </section>
+
+  <section class="status-card" id="complimentaryView">
+    <div class="status-icon">✓</div>
+    <span class="complimentary-badge">Approved complimentary access</span>
+    <h2>All ReadySetPrep content is unlocked</h2>
+    <p>Your complimentary access request has been approved. No Venmo payment is required.</p>
+
+    <div class="status-box">
+      <span>Access type</span>
+      <b id="complimentaryType">Complimentary</b>
+    </div>
+
+    <div class="button-row">
+      <a class="btn btn-primary" href="practice.html">Practice & full passages</a>
+      <a class="btn btn-secondary" href="primary-tests.html">Primary 2 tests</a>
+      <a class="btn btn-secondary" href="lower-tests.html">Lower Level tests</a>
+    </div>
   </section>
 </main>
 
@@ -436,6 +617,20 @@ const VENMO_USERNAME='YOUR_VENMO_BUSINESS_USERNAME';
 const VENMO_PROFILE_URL='https://venmo.com/u/YOUR_VENMO_BUSINESS_USERNAME';
 const MONTHLY_PRICE=9.99;
 const TRIAL_DAYS=3;
+
+// Private-beta complimentary codes.
+// Because this version is a static website, these codes are checked in the browser.
+// Move access-code validation to a backend before a wider public launch.
+const COMPLIMENTARY_CODES={
+  'RSP-FAMILY':{label:'Family access',type:'family'},
+  'RSP-TEACHER':{label:'Teacher access',type:'teacher'}
+};
+
+
+// Private-beta approval code used after you review the email request.
+// Change this before deployment. For production, approval must move to a backend.
+const ADMIN_APPROVAL_CODE='RSP-APPROVE-2026';
+
 
 function readJson(key,fallback){
   try{
@@ -476,6 +671,8 @@ function hideAllViews(){
   document.getElementById('trialActiveView').style.display='none';
   document.getElementById('venmoPaymentView').style.display='none';
   document.getElementById('pendingView').style.display='none';
+  document.getElementById('approvalPendingView').style.display='none';
+  document.getElementById('complimentaryView').style.display='none';
 }
 function showView(id){
   hideAllViews();
@@ -499,6 +696,18 @@ function render(){
     return;
   }
 
+  if(subscription.status==='approval_pending'){
+    showApprovalPending(subscription,profile);
+    return;
+  }
+
+  if(subscription.status==='complimentary' && subscription.accessLevel==='full' && subscription.approved===true){
+    showView('complimentaryView');
+    document.getElementById('complimentaryType').textContent=
+      subscription.accessLabel||'Complimentary full access';
+    return;
+  }
+
   if(subscription.status==='payment_pending'){
     showView('pendingView');
     document.getElementById('pendingReference').textContent=
@@ -514,6 +723,146 @@ function render(){
   }
 
   showVenmoPayment();
+}
+function normalizeAccessCode(value){
+  return String(value||'').trim().toUpperCase().replace(/\s+/g,'');
+}
+function makeRequestId(){
+  const stamp=Date.now().toString(36).toUpperCase();
+  const random=Math.random().toString(36).slice(2,7).toUpperCase();
+  return `RSP-${stamp}-${random}`;
+}
+function requestComplimentaryCode(rawCode){
+  const code=normalizeAccessCode(rawCode);
+  const config=COMPLIMENTARY_CODES[code];
+  if(!config)return {ok:false,message:'That access code is not valid.'};
+
+  const now=new Date().toISOString();
+  const existing=currentSubscription()||{};
+  const requestId=makeRequestId();
+
+  saveJson(SUBSCRIPTION_KEY,{
+    ...existing,
+    status:'approval_pending',
+    accessLevel:'none',
+    accessSource:'access_code',
+    accessType:config.type,
+    accessLabel:config.label,
+    requestedCode:code,
+    approvalRequestId:requestId,
+    approvalRequestedAt:now,
+    approved:false,
+    expiresAt:null,
+    autoRenew:false,
+    monthlyPrice:0
+  });
+
+  return {ok:true,label:config.label,requestId};
+}
+async function sendApprovalRequest(subscription,profile,button,messageEl){
+  button.disabled=true;
+  const original=button.textContent;
+  button.textContent='Sending…';
+  messageEl.textContent='';
+
+  try{
+    const response=await fetch('/api/access-approval',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        requestId:subscription.approvalRequestId||'',
+        accessLabel:subscription.accessLabel||'',
+        requestedCode:subscription.requestedCode||'',
+        name:profile?.name||'',
+        email:profile?.email||''
+      })
+    });
+
+    const result=await response.json().catch(()=>({}));
+    if(!response.ok)throw new Error(result.error||'Unable to send approval request.');
+
+    messageEl.style.color='var(--teal)';
+    messageEl.textContent='Approval request sent to ReadySetPrep.';
+  }catch(error){
+    messageEl.style.color='var(--danger)';
+    messageEl.textContent=error.message||'Unable to send approval request.';
+  }finally{
+    button.disabled=false;
+    button.textContent=original;
+  }
+}
+function showApprovalPending(subscription,profile){
+  showView('approvalPendingView');
+  document.getElementById('pendingAccessType').textContent=
+    subscription.accessLabel||'Complimentary access';
+  document.getElementById('approvalRequestId').textContent=
+    subscription.approvalRequestId||'Pending';
+
+  const sendButton=document.getElementById('emailApprovalRequest');
+  const message=document.getElementById('approvalMessage');
+  sendButton.onclick=()=>sendApprovalRequest(subscription,profile,sendButton,message);
+}
+function approvePendingAccess(rawApprovalCode){
+  const entered=String(rawApprovalCode||'').trim().toUpperCase();
+  if(entered!==ADMIN_APPROVAL_CODE)return {ok:false,message:'Approval code is not valid.'};
+
+  const subscription=currentSubscription();
+  if(!subscription||subscription.status!=='approval_pending'){
+    return {ok:false,message:'There is no pending access request.'};
+  }
+
+  saveJson(SUBSCRIPTION_KEY,{
+    ...subscription,
+    status:'complimentary',
+    accessLevel:'full',
+    approved:true,
+    approvedAt:new Date().toISOString(),
+    monthlyPrice:0,
+    autoRenew:false
+  });
+
+  return {ok:true};
+}
+function bindAccessCodeForms(){
+  document.querySelectorAll('.access-code-form').forEach(form=>{
+    form.addEventListener('submit',event=>{
+      event.preventDefault();
+      const input=form.querySelector('.access-code-input');
+      const message=form.querySelector('.access-code-message');
+      const result=requestComplimentaryCode(input?.value||'');
+
+      if(!result.ok){
+        message.textContent=result.message;
+        message.style.color='var(--danger)';
+        return;
+      }
+
+      message.textContent=`${result.label} requested. Approval is required.`;
+      message.style.color='var(--warning)';
+      if(input)input.value='';
+      render();
+    });
+  });
+}
+function bindApprovalControls(){
+  const button=document.getElementById('applyApprovalCode');
+  if(!button)return;
+  button.addEventListener('click',()=>{
+    const input=document.getElementById('adminApprovalCode');
+    const message=document.getElementById('approvalMessage');
+    const result=approvePendingAccess(input?.value||'');
+
+    if(!result.ok){
+      message.textContent=result.message;
+      message.style.color='var(--danger)';
+      return;
+    }
+
+    message.textContent='Access approved.';
+    message.style.color='var(--teal)';
+    if(input)input.value='';
+    render();
+  });
 }
 function showVenmoPayment(){
   const profile=readJson(PROFILE_KEY,null);
@@ -626,6 +975,8 @@ document.getElementById('changeReference').addEventListener('click',()=>{
   render();
 });
 
+bindAccessCodeForms();
+bindApprovalControls();
 render();
 </script>
 </body>

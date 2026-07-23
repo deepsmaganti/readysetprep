@@ -49,9 +49,9 @@ COMPACT SELECTOR CHECK
 
 PRACTICE EXERCISE VALIDATION
 - Six ISEE levels included
-- Primary 2: 8 concept modules / 55 questions
+- Primary 2: 20 concept modules / 151 questions
 - Primary 3, Primary 4, Lower, Middle, Upper: 5 modules / 25 questions each
-- 180 original concept-practice questions total
+- 276 original concept-practice questions total
 - Four choices and one validated answer per question
 - Immediate feedback and explanations
 - Local mastery tracking
@@ -362,3 +362,96 @@ PRIMARY 2 FULL PASSAGE VALIDATION
 - Completion score and review
 - Saved best score and attempt count
 - JavaScript syntax check: PASSED
+
+
+COMPLIMENTARY ACCESS VALIDATION
+- RSP-FAMILY accepted
+- RSP-TEACHER accepted
+- Codes are normalized to uppercase
+- Invalid code displays an error
+- Complimentary status grants accessLevel=full
+- Complimentary access has no expiration in this beta
+- Payment page shows complimentary full-access state
+- Practice page checks access
+- Primary 2 tests page checks access
+- Lower Level tests page checks access
+- Returning valid-access login skips payment
+- JavaScript syntax checks: PASSED
+
+
+ACCESS-CODE APPROVAL VALIDATION
+- RSP-FAMILY creates approval_pending state
+- RSP-TEACHER creates approval_pending state
+- Code entry does not immediately unlock content
+- Unique approval request ID generated
+- Approval request mailto link generated
+- Request email contains request ID and account details
+- Admin approval code required before accessLevel=full
+- Practice/Test guards require approved=true
+- Login access check requires approved=true
+- JavaScript syntax checks: PASSED
+
+
+APPROVAL EMAIL CHECK
+- ACCESS_APPROVAL_EMAIL = readysetprepai@gmail.com
+- JavaScript syntax check: PASSED
+
+
+CONTACT PAGE VALIDATION
+- contact.html added
+- Contact form sends to readysetprepai@gmail.com
+- Direct contact mailto uses readysetprepai@gmail.com
+- Access approval email uses readysetprepai@gmail.com
+- Landing Contact link added
+- Login Contact link added
+- Payment/access Contact link added
+- Privacy Contact link added
+- No other explicit email destination found in HTML
+- JavaScript syntax checks: PASSED
+
+
+DIRECT EMAIL VALIDATION
+- Visible contact email removed from contact.html
+- contact.html contains no mailto link
+- Contact form POSTs to /api/contact
+- Approval request POSTs to /api/access-approval
+- Destination email is not embedded in contact.html or payment.html
+- Server-side functions use CONTACT_TO_EMAIL environment variable
+- RESEND_API_KEY is read only from server environment
+- JavaScript syntax checks: PASSED
+
+
+PRIMARY 2 EXPANDED MATH VALIDATION
+- 12 new math modules
+- 8 questions per new module
+- 96 new original math questions
+- Number sense and operations covered
+- Algebraic concepts/patterns covered
+- 2D/3D geometry covered
+- Halves/symmetry/spatial reasoning covered
+- Measurement/time/calendar covered
+- U.S. coins/money covered
+- Pictographs/bar graphs/data covered
+- Simple probability covered
+- Text-based visuals supported
+- Reading and Math practice grouped separately for Primary 2
+
+
+PRIMARY 2 SUBJECT PICKER VALIDATION
+- Reading and Math shown as separate subject cards
+- Reading page contains Reading concepts only
+- Full Passages appear only under Reading
+- Math page contains Mathematics concepts only
+- Mixed Reading draws only from Reading modules
+- Mixed Math draws only from Mathematics modules
+- Back to Subjects navigation included
+- JavaScript syntax checks: PASSED
+
+
+NO-FUNCTIONS-FOLDER VALIDATION
+- /functions directory removed
+- _worker.js added at repository root
+- /api/contact route retained
+- /api/access-approval route retained
+- static files forwarded through env.ASSETS
+- _worker.js syntax check: PASSED

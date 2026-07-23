@@ -144,9 +144,9 @@ PRACTICE EXERCISES
   - Lower
   - Middle
   - Upper
-- Primary 2 now includes eight concept modules and 55 original practice
+- Primary 2 now includes 20 concept modules and 151 original practice
   questions. The other five levels retain five concept modules with five
-  questions each, for 180 original concept-practice questions altogether.
+  questions each, for 276 original concept-practice questions altogether.
 - Primary concepts cover reading comprehension, vocabulary, number sense,
   operations, fractions, data, geometry, and measurement.
 - Lower, Middle, and Upper concepts cover verbal reasoning, reading
@@ -552,3 +552,135 @@ PRIMARY 2 FULL PASSAGES
   - score and full answer review at completion
 - Full Passage scores/attempts are saved separately in localStorage.
 - All passages, questions, answer choices, and explanations are original.
+
+
+COMPLIMENTARY ACCESS CODES
+- Added private-beta access-code support on payment.html.
+- Complimentary codes:
+  - RSP-FAMILY -> Family access
+  - RSP-TEACHER -> Teacher access
+- A valid code:
+  - bypasses Venmo payment
+  - sets status to complimentary
+  - grants full access to Practice, Primary 2 tests, and Lower Level tests
+  - has no expiration in this beta build
+- Access codes can be entered:
+  - before starting the trial
+  - during an active trial
+  - when monthly Venmo payment is due
+  - while a Venmo payment is pending
+- Practice/test pages now perform a local access check and redirect users without
+  an active trial, active subscription, or complimentary access to payment.html.
+- Returning users with valid local access skip payment after login.
+
+SECURITY NOTE
+- This is still a static-browser beta implementation.
+- The access codes and entitlement logic can be discovered or bypassed by a
+  technically skilled user.
+- Before a public launch, move access-code verification and paid-access
+  enforcement to a server/backend.
+
+
+ACCESS-CODE EMAIL APPROVAL WORKFLOW
+- RSP-FAMILY and RSP-TEACHER no longer grant immediate access.
+- A valid access code now creates an approval-pending request.
+- Full Practice / Primary 2 / Lower Level access remains locked until approval.
+- The pending page shows:
+  - access type
+  - unique request ID
+  - Email approval request button
+  - administrator approval-code field
+- The Email approval request button opens the user's email application with a
+  prefilled message containing request ID, access type, code used, name, and email.
+- The administrator reviews the request and replies with the private approval code.
+- Entering the correct admin approval code changes the local entitlement to:
+  status=complimentary, accessLevel=full, approved=true.
+- Configure ACCESS_APPROVAL_EMAIL in payment.html before deployment.
+- Change ADMIN_APPROVAL_CODE before deployment.
+
+IMPORTANT
+- A static website cannot securely perform true email-based approval.
+- The mailto link opens an email draft; the website does not send email automatically.
+- The admin approval code is present in client-side JavaScript and can be discovered
+  by a technically skilled user.
+- For a public launch, use a backend/Cloudflare Function to send approval emails and
+  store/approve requests server-side.
+
+
+APPROVAL EMAIL CONFIGURATION
+- Access-code approval requests are addressed to: readysetprepai@gmail.com
+
+
+CONTACT PAGE
+- Added contact.html.
+- Contact form supports:
+  - name
+  - email
+  - topic
+  - message
+- Every contact message is addressed to readysetprepai@gmail.com.
+- Added Contact links from the landing page, login page, payment/access page,
+  and privacy page.
+- Access-code approval requests also continue to use readysetprepai@gmail.com.
+- Because this is a static site, the contact form opens the user's email app
+  with a prefilled email; it does not send mail directly from the website.
+
+
+DIRECT EMAIL DELIVERY
+- Contact form no longer displays the ReadySetPrep email address.
+- Contact form no longer uses mailto or opens the user's email application.
+- Contact messages POST to /api/contact and are sent server-side.
+- Access-code approval requests POST to /api/access-approval and are also sent
+  server-side.
+- Added Cloudflare Pages advanced-mode backend: _worker.js
+- The destination mailbox is configured server-side through CONTACT_TO_EMAIL.
+- Configure CONTACT_TO_EMAIL as readysetprepai@gmail.com in Cloudflare.
+- Requires RESEND_API_KEY and CONTACT_FROM_EMAIL.
+- See DIRECT_EMAIL_SETUP.txt.
+
+
+PRIMARY 2 MATH PRACTICE EXPANSION
+- Added 12 new focused Mathematics concept modules with 8 questions each
+  (96 new original math questions).
+- New math modules:
+  - Counting & Number Recognition
+  - Place Value & Number Lines
+  - Compare, Order, Odd & Even
+  - Addition & Subtraction
+  - Equations, Missing Numbers & Fact Families
+  - Equal Groups & Multi-Step Problems
+  - Number & Shape Patterns
+  - 2D & 3D Shapes
+  - Halves, Symmetry & Spatial Reasoning
+  - Measurement, Time & Calendar
+  - Coins & Money
+  - Graphs, Data & Probability
+- These were designed around the Primary 2 concept reference supplied for this
+  project, using entirely original questions, choices, explanations, and
+  text-based visuals.
+- Added simple visual practice displays for number lines, place-value models,
+  patterns, pictographs, and bar graphs.
+- Primary 2 Practice now displays separate Reading Practice and
+  Math Practice by Concept sections.
+
+
+PRIMARY 2 SUBJECT PICKER
+- Primary 2 Practice now opens with two clear subject choices:
+  - Reading
+  - Math
+- Reading opens only Reading concepts and the Full Passages section.
+- Math opens only Mathematics concepts.
+- Each subject has its own mixed-practice button:
+  - Mixed Reading
+  - Mixed Math
+- A Subjects button returns users to the Reading/Math chooser.
+- Changing levels resets the subject selection.
+
+
+GITHUB-UPLOAD SIMPLIFICATION
+- Removed the nested /functions folder.
+- Direct Contact email and access approval are now handled by one root file:
+  _worker.js
+- This uses Cloudflare Pages advanced mode.
+- All website files can now be uploaded at the repository root through the
+  GitHub web interface.

@@ -162,11 +162,31 @@ body{
 
     <div class="note"><b>Static-site preview:</b> the name and email are saved only in this browser. The password is never stored. Secure production login will require a backend authentication service.</div>
     <a class="back" href="index.html">← Back to ReadySetPrep</a>
+    <a class="back" href="contact.html">Contact ReadySetPrep</a>
   </section>
 </main>
 
 <script>
 const PROFILE_KEY='readysetprep:user:v1';
+const SUBSCRIPTION_KEY='readysetprep:subscription:v1';
+
+function hasReadySetPrepAccess(){
+  try{
+    const access=JSON.parse(localStorage.getItem(SUBSCRIPTION_KEY));
+    if(!access)return false;
+    if(access.status==='complimentary' && access.accessLevel==='full' && access.approved===true)return true;
+    if(access.status==='trialing' && access.trialEndsAt){
+      return new Date(access.trialEndsAt).getTime()>Date.now();
+    }
+    if(access.status==='active'){
+      if(!access.accessUntil)return true;
+      return new Date(access.accessUntil).getTime()>Date.now();
+    }
+    return false;
+  }catch(error){
+    return false;
+  }
+}
 let mode='login';
 
 function readProfile(){
@@ -220,7 +240,7 @@ document.getElementById('form').addEventListener('submit',event=>{
     email,
     updatedAt:new Date().toISOString()
   }));
-  location.href='payment.html';
+  location.href=hasReadySetPrepAccess()?'practice.html':'payment.html';
 });
 
 const existing=readProfile();

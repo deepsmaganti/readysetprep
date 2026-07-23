@@ -1,0 +1,40 @@
+READYSETPREP ACCESS APPROVAL SETUP
+
+Current private-beta workflow
+-----------------------------
+1. User enters RSP-FAMILY or RSP-TEACHER.
+2. Website creates a unique pending request ID.
+3. User clicks "Email approval request".
+4. Their email application opens with a prefilled request.
+5. You review that email.
+6. If approved, reply with the administrator approval code.
+7. User enters that approval code on the pending page.
+8. Full ReadySetPrep access becomes active in that browser.
+
+Required configuration
+----------------------
+Open payment.html and replace:
+
+const ACCESS_APPROVAL_EMAIL='readysetprepai@gmail.com';
+
+with the approval mailbox (readysetprepai@gmail.com).
+
+Also change:
+
+const ADMIN_APPROVAL_CODE='RSP-APPROVE-2026';
+
+to a private approval code that only you know.
+
+Security limitation
+-------------------
+This is suitable only for a small private beta.
+
+Because the site is static:
+- mailto opens the user's email app; it cannot send automatically
+- the approval code exists in browser JavaScript
+- a technical user could inspect or bypass the client-side checks
+- access is stored only in that browser
+
+For production, move approval requests and access entitlements to a backend
+or Cloudflare Pages Function. The email approval link should then call a
+server-side approve/deny endpoint instead of sharing an approval code.

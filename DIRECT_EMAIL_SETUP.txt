@@ -1,0 +1,58 @@
+READYSETPREP DIRECT EMAIL SETUP — NO FUNCTIONS FOLDER
+
+This version uses ONE backend file at the project root:
+
+_worker.js
+
+You do NOT need to upload a functions folder.
+
+GitHub repository layout
+------------------------
+index.html
+login.html
+payment.html
+practice.html
+primary-tests.html
+lower-tests.html
+contact.html
+privacy.html
+_worker.js
+...other text files
+
+Cloudflare setup
+----------------
+In your Cloudflare Pages project:
+
+1. Go to Workers & Pages.
+2. Open the ReadySetPrep Pages project.
+3. Open Settings > Variables and Secrets.
+4. Add these values for Production (and Preview if desired):
+
+   RESEND_API_KEY
+   - Type: Secret
+   - Value: your Resend API key
+
+   CONTACT_TO_EMAIL
+   - Value: readysetprepai@gmail.com
+
+   CONTACT_FROM_EMAIL
+   - Value: a sender address verified with your email provider
+   - Example after verifying readysetprep.ai:
+     ReadySetPrep <contact@readysetprep.ai>
+
+5. Redeploy through the Git-connected Cloudflare Pages project.
+
+How it works
+------------
+POST /api/contact
+- Sends Contact form messages.
+
+POST /api/access-approval
+- Sends RSP-FAMILY / RSP-TEACHER approval requests.
+
+All other requests are passed through to the normal Cloudflare Pages static files.
+
+Important
+---------
+Do not put RESEND_API_KEY in any HTML or public JavaScript file.
+Store it as an encrypted Cloudflare secret.
