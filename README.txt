@@ -470,47 +470,30 @@ PROGRESS BUTTON UPDATE
 - All three landing-page options now have equal visual emphasis.
 
 
-PAYMENT AND SUBSCRIPTION PAGE
-- Added payment.html.
 - Plan:
   - 3-day free trial
   - $9.99 per month after the trial
   - monthly renewal until canceled
-- Landing-page Get Started and hero buttons now open the payment page.
-- Creating or logging into a browser profile now continues to payment.html.
-- Payment page includes:
   - name and email
   - card number, expiration, CVC, and ZIP fields
   - trial and renewal disclosure
-  - billing-start date
   - trial confirmation screen
 - Static-site safety:
   - card information is never stored
   - no real charge is processed
   - only local trial/subscription status is saved
-- Real production billing still requires a secure payment provider, webhooks,
   server-side subscription validation, cancellation management, and account
   entitlements.
 
 
-LANDING PAGE PAYMENT COPY UPDATE
 - Removed all free-trial and monthly-price details from the landing page.
 - Replaced trial-focused calls to action with the neutral label “Get started.”
-- Trial and pricing details remain only on payment.html.
 
 
-MANUAL VENMO PAYMENT WORKFLOW
 - Removed the card-entry form.
-- Added a manual Venmo monthly-payment workflow:
   - 3 days of initial access
-  - $9.99 monthly payment through Venmo
   - no automatic charging or renewal
-  - Venmo username, link, amount, and payment note displayed
-  - customer records a Venmo confirmation reference
-  - payment status changes to “payment pending”
 - The static site does not automatically verify payments or activate monthly
-  access after payment.
-- Update the Venmo username and URL in payment.html before deployment.
 - See VENMO_SETUP.txt.
 
 
@@ -555,23 +538,15 @@ PRIMARY 2 FULL PASSAGES
 
 
 COMPLIMENTARY ACCESS CODES
-- Added private-beta access-code support on payment.html.
 - Complimentary codes:
-  - RSP-FAMILY -> Family access
-  - RSP-TEACHER -> Teacher access
 - A valid code:
-  - bypasses Venmo payment
   - sets status to complimentary
   - grants full access to Practice, Primary 2 tests, and Lower Level tests
   - has no expiration in this beta build
 - Access codes can be entered:
   - before starting the trial
   - during an active trial
-  - when monthly Venmo payment is due
-  - while a Venmo payment is pending
 - Practice/test pages now perform a local access check and redirect users without
-  an active trial, active subscription, or complimentary access to payment.html.
-- Returning users with valid local access skip payment after login.
 
 SECURITY NOTE
 - This is still a static-browser beta implementation.
@@ -582,7 +557,6 @@ SECURITY NOTE
 
 
 ACCESS-CODE EMAIL APPROVAL WORKFLOW
-- RSP-FAMILY and RSP-TEACHER no longer grant immediate access.
 - A valid access code now creates an approval-pending request.
 - Full Practice / Primary 2 / Lower Level access remains locked until approval.
 - The pending page shows:
@@ -595,7 +569,6 @@ ACCESS-CODE EMAIL APPROVAL WORKFLOW
 - The administrator reviews the request and replies with the private approval code.
 - Entering the correct admin approval code changes the local entitlement to:
   status=complimentary, accessLevel=full, approved=true.
-- Configure ACCESS_APPROVAL_EMAIL in payment.html before deployment.
 - Change ADMIN_APPROVAL_CODE before deployment.
 
 IMPORTANT
@@ -608,7 +581,6 @@ IMPORTANT
 
 
 APPROVAL EMAIL CONFIGURATION
-- Access-code approval requests are addressed to: readysetprepai@gmail.com
 
 
 CONTACT PAGE
@@ -619,9 +591,7 @@ CONTACT PAGE
   - topic
   - message
 - Every contact message is addressed to readysetprepai@gmail.com.
-- Added Contact links from the landing page, login page, payment/access page,
   and privacy page.
-- Access-code approval requests also continue to use readysetprepai@gmail.com.
 - Because this is a static site, the contact form opens the user's email app
   with a prefilled email; it does not send mail directly from the website.
 
@@ -630,7 +600,6 @@ DIRECT EMAIL DELIVERY
 - Contact form no longer displays the ReadySetPrep email address.
 - Contact form no longer uses mailto or opens the user's email application.
 - Contact messages POST to /api/contact and are sent server-side.
-- Access-code approval requests POST to /api/access-approval and are also sent
   server-side.
 - Added Cloudflare Pages advanced-mode backend: _worker.js
 - The destination mailbox is configured server-side through CONTACT_TO_EMAIL.
@@ -684,3 +653,9 @@ GITHUB-UPLOAD SIMPLIFICATION
 - This uses Cloudflare Pages advanced mode.
 - All website files can now be uploaded at the repository root through the
   GitHub web interface.
+
+NO PAYMENT VERSION
+- Payment, trial, Venmo, subscription, and access-code approval features were removed.
+- Users can open Practice and test pages directly.
+- Login now goes directly to Practice.
+- Contact email remains available through the Contact page and _worker.js.

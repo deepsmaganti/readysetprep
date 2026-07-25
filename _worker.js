@@ -95,55 +95,6 @@ ${message}`;
   }
 }
 
-async function handleAccessApproval(request, env) {
-  try {
-    const body = await request.json();
-
-    const requestId = clean(body.requestId, 80);
-    const accessLabel = clean(body.accessLabel, 80);
-    const requestedCode = clean(body.requestedCode, 80);
-    const name = clean(body.name, 80);
-    const email = clean(body.email, 160).toLowerCase();
-
-    if (!requestId || !accessLabel || !requestedCode) {
-      return json({ error: "Approval request is incomplete." }, 400);
-    }
-
-    const subject = `ReadySetPrep access approval: ${requestId}`;
-    const text =
-`Please review this ReadySetPrep complimentary-access request.
-
-Request ID: ${requestId}
-Access type: ${accessLabel}
-Access code used: ${requestedCode}
-Name: ${name}
-Email: ${email}
-
-If approved, provide the private approval code to the requester.`;
-
-    const html = `
-      <h2>ReadySetPrep complimentary-access request</h2>
-      <p><b>Request ID:</b> ${escapeHtml(requestId)}</p>
-      <p><b>Access type:</b> ${escapeHtml(accessLabel)}</p>
-      <p><b>Access code used:</b> ${escapeHtml(requestedCode)}</p>
-      <p><b>Name:</b> ${escapeHtml(name)}</p>
-      <p><b>Email:</b> ${escapeHtml(email)}</p>
-      <p>If approved, provide the private approval code to the requester.</p>
-    `;
-
-    await sendEmail(env, {
-      subject,
-      replyTo: /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email) ? email : undefined,
-      text,
-      html
-    });
-
-    return json({ ok: true });
-  } catch (error) {
-    console.error(error);
-    return json({ error: "Unable to send the approval request right now." }, 500);
-  }
-}
 
 export default {
   async fetch(request, env) {
@@ -154,10 +105,6 @@ export default {
       return handleContact(request, env);
     }
 
-    if (url.pathname === "/api/access-approval") {
-      if (request.method !== "POST") return json({ error: "Method not allowed." }, 405);
-      return handleAccessApproval(request, env);
-    }
 
     // Serve all normal HTML/static files through Cloudflare Pages.
     return env.ASSETS.fetch(request);

@@ -304,15 +304,11 @@ PROGRESS BUTTON STYLE CHECK
 - JavaScript syntax check: PASSED
 
 
-PAYMENT PAGE CHECK
 - 3-day free trial displayed
 - $9.99 monthly price displayed
 - Auto-renewal disclosure displayed
 - Future billing date calculated
 - Card details not stored
-- Local subscription status stored
-- Landing CTA links to payment page
-- Login redirects to payment page
 - Privacy notice updated
 - JavaScript syntax checks: PASSED
 
@@ -321,20 +317,14 @@ LANDING PAGE TRIAL COPY CHECK
 - No 3-day free-trial wording on landing page
 - No $9.99 monthly wording on landing page
 - Landing CTA uses “Get started”
-- Payment page retains trial and pricing details
 - JavaScript syntax check: PASSED
 
 
-MANUAL VENMO PAYMENT CHECK
 - Card number field removed
 - Expiration field removed
 - CVC field removed
 - Billing ZIP field removed
 - Automatic-renewal wording removed
-- Manual $9.99 Venmo payment instructions added
-- Unique payment note generated from email
-- Venmo confirmation-reference field added
-- Payment pending state added
 - Card details are not collected or stored
 - JavaScript syntax check: PASSED
 
@@ -364,27 +354,15 @@ PRIMARY 2 FULL PASSAGE VALIDATION
 - JavaScript syntax check: PASSED
 
 
-COMPLIMENTARY ACCESS VALIDATION
-- RSP-FAMILY accepted
-- RSP-TEACHER accepted
 - Codes are normalized to uppercase
 - Invalid code displays an error
-- Complimentary status grants accessLevel=full
-- Complimentary access has no expiration in this beta
-- Payment page shows complimentary full-access state
 - Practice page checks access
 - Primary 2 tests page checks access
 - Lower Level tests page checks access
-- Returning valid-access login skips payment
 - JavaScript syntax checks: PASSED
 
 
-ACCESS-CODE APPROVAL VALIDATION
-- RSP-FAMILY creates approval_pending state
-- RSP-TEACHER creates approval_pending state
 - Code entry does not immediately unlock content
-- Unique approval request ID generated
-- Approval request mailto link generated
 - Request email contains request ID and account details
 - Admin approval code required before accessLevel=full
 - Practice/Test guards require approved=true
@@ -404,7 +382,6 @@ CONTACT PAGE VALIDATION
 - Access approval email uses readysetprepai@gmail.com
 - Landing Contact link added
 - Login Contact link added
-- Payment/access Contact link added
 - Privacy Contact link added
 - No other explicit email destination found in HTML
 - JavaScript syntax checks: PASSED
@@ -414,8 +391,6 @@ DIRECT EMAIL VALIDATION
 - Visible contact email removed from contact.html
 - contact.html contains no mailto link
 - Contact form POSTs to /api/contact
-- Approval request POSTs to /api/access-approval
-- Destination email is not embedded in contact.html or payment.html
 - Server-side functions use CONTACT_TO_EMAIL environment variable
 - RESEND_API_KEY is read only from server environment
 - JavaScript syntax checks: PASSED
@@ -455,3 +430,17 @@ NO-FUNCTIONS-FOLDER VALIDATION
 - /api/access-approval route retained
 - static files forwarded through env.ASSETS
 - _worker.js syntax check: PASSED
+
+NO PAYMENT VALIDATION
+- payment.html removed
+- VENMO_SETUP.txt removed
+- ACCESS_APPROVAL_SETUP.txt removed
+- Trial/subscription access guards removed
+- Practice opens without payment state
+- Primary 2 tests open without payment state
+- Lower Level tests open without payment state
+- Login redirects directly to practice.html
+- Landing page has no Pricing link
+- Contact page has no payment/billing topic
+- _worker.js keeps only /api/contact backend route
+- JavaScript syntax checks: PASSED

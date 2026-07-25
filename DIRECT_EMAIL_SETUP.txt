@@ -47,8 +47,6 @@ How it works
 POST /api/contact
 - Sends Contact form messages.
 
-POST /api/access-approval
-- Sends RSP-FAMILY / RSP-TEACHER approval requests.
 
 All other requests are passed through to the normal Cloudflare Pages static files.
 

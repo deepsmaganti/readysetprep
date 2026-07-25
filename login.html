@@ -168,25 +168,6 @@ body{
 
 <script>
 const PROFILE_KEY='readysetprep:user:v1';
-const SUBSCRIPTION_KEY='readysetprep:subscription:v1';
-
-function hasReadySetPrepAccess(){
-  try{
-    const access=JSON.parse(localStorage.getItem(SUBSCRIPTION_KEY));
-    if(!access)return false;
-    if(access.status==='complimentary' && access.accessLevel==='full' && access.approved===true)return true;
-    if(access.status==='trialing' && access.trialEndsAt){
-      return new Date(access.trialEndsAt).getTime()>Date.now();
-    }
-    if(access.status==='active'){
-      if(!access.accessUntil)return true;
-      return new Date(access.accessUntil).getTime()>Date.now();
-    }
-    return false;
-  }catch(error){
-    return false;
-  }
-}
 let mode='login';
 
 function readProfile(){
@@ -240,7 +221,7 @@ document.getElementById('form').addEventListener('submit',event=>{
     email,
     updatedAt:new Date().toISOString()
   }));
-  location.href=hasReadySetPrepAccess()?'practice.html':'payment.html';
+  location.href='practice.html';
 });
 
 const existing=readProfile();
