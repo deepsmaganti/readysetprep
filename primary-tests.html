@@ -1511,7 +1511,7 @@ function home(){
 
   <div class="input-row">
    <label for="studentName"><b>Student name</b></label>
-   <input id="studentName" value="${escapeHtml(window.RSPCloud?.activeStudentName?.()||state.student||'')}" readonly />
+   <input id="studentName" value="${escapeHtml(window.RSPCloud?.activeStudentName?.()||state.student||'')}" ${window.RSPCloud?.activeStudentId?.()?'readonly':''} />
   </div>
 
   <div class="home-actions">
@@ -1522,7 +1522,7 @@ function home(){
   </div>
 
   <div class="home-footer">
-   <p class="footer-note">Progress and assessment reports are saved to the selected student's ReadySetPrep account.</p>
+   <p class="footer-note">Guest progress is saved in this browser. Signed-in student progress and assessment reports sync to the ReadySetPrep account.</p>
    <a href="privacy.html">Privacy notice</a>
   </div>
  </section></main>`;

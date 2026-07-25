@@ -80,10 +80,11 @@ h1{margin:0 0 7px;font-size:31px;letter-spacing:-.035em}
     </div>
     <p class="message" id="message" role="alert"></p>
     <button class="btn btn-primary" id="submit" type="submit">Log in</button>
+    <button class="btn btn-secondary" id="guest" type="button">Get started as Guest</button>
     <button class="btn btn-secondary" id="home" type="button">Back to home</button>
   </form>
 
-  <div class="note"><b>Assessment tracking:</b> after login, choose a student. ReadySetPrep will load that student's saved tests, practice history, and assessment reports.</div>
+  <div class="note"><b>Login is optional.</b> Guests can practice and complete tests without an account; guest progress stays in that browser. After login, choose a student to sync saved tests, practice history, and assessment reports across devices.</div>
   <a class="back" href="contact.html">Contact ReadySetPrep</a>
 </section>
 
@@ -115,6 +116,7 @@ function setMode(next){
 
 document.getElementById('loginTab').onclick=()=>setMode('login');
 document.getElementById('createTab').onclick=()=>setMode('create');
+document.getElementById('guest').onclick=()=>location.href='practice.html';
 document.getElementById('home').onclick=()=>location.href='index.html';
 
 document.getElementById('form').addEventListener('submit',async event=>{

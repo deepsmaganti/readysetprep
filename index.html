@@ -209,7 +209,7 @@ button{font:inherit}
 
     <div class="header-actions" id="signedOut">
       <a class="btn btn-secondary" href="login.html">Log in</a>
-      <a class="btn btn-primary" href="login.html" id="headerStart">Get started</a>
+      <a class="btn btn-primary" href="practice.html" id="headerStart">Get started as Guest</a>
     </div>
 
     <div class="user-area" id="signedIn">
@@ -223,9 +223,9 @@ button{font:inherit}
   <section class="hero">
     <div class="wrap">
       <h1>Practice. Review. Improve.</h1>
-      <p>ReadySetPrep gives students focused practice, clear explanations, and useful next steps.</p>
+      <p>ReadySetPrep gives students focused practice, clear explanations, and useful next steps. Start as a guest or log in to sync progress across devices.</p>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="login.html" id="heroStart">Get started</a>
+        <a class="btn btn-primary" href="practice.html" id="heroStart">Get started as Guest</a>
         <a class="btn btn-secondary" href="login.html" id="heroLogin">Log in</a>
       </div>
     </div>
@@ -238,21 +238,21 @@ button{font:inherit}
           <div class="option-icon">T</div>
           <h2>Test Preparation</h2>
           <p>Practice complete tests or focus on one section at a time.</p>
-          <a class="btn btn-primary" href="login.html" id="testPrepLink">Explore tests</a>
+          <a class="btn btn-primary" href="practice.html" id="testPrepLink">Explore tests</a>
         </article>
 
         <article class="option">
           <div class="option-icon">S</div>
           <h2>Skill Practice</h2>
           <p>Build reading, math, reasoning, and writing skills with focused practice.</p>
-          <a class="btn btn-primary" href="login.html" id="skillPracticeLink">Practice skills</a>
+          <a class="btn btn-primary" href="practice.html" id="skillPracticeLink">Practice skills</a>
         </article>
 
         <article class="option">
           <div class="option-icon">P</div>
           <h2>Progress</h2>
           <p>Review completed work and see what to practice next.</p>
-          <a class="btn btn-primary" href="login.html" id="progressLink">View reports</a>
+          <a class="btn btn-primary" href="primary-tests.html?view=history" id="progressLink">View reports</a>
         </article>
       </div>
 </div>
@@ -289,6 +289,13 @@ async function renderAccount(){
   if(!RSPCloud.configured){
     signedOut.style.display='flex';
     signedIn.style.display='none';
+    headerStart.href='practice.html';
+    heroStart.href='practice.html';
+    headerStart.textContent='Get started as Guest';
+    heroStart.textContent='Get started as Guest';
+    testPrep.href='practice.html';
+    skillPractice.href='practice.html';
+    progress.href='primary-tests.html?view=history';
     return;
   }
 
@@ -296,7 +303,13 @@ async function renderAccount(){
   if(!user){
     signedOut.style.display='flex';
     signedIn.style.display='none';
-    [headerStart,heroStart,testPrep,skillPractice,progress].forEach(link=>link.href='login.html');
+    headerStart.href='practice.html';
+    heroStart.href='practice.html';
+    headerStart.textContent='Get started as Guest';
+    heroStart.textContent='Get started as Guest';
+    testPrep.href='practice.html';
+    skillPractice.href='practice.html';
+    progress.href='primary-tests.html?view=history';
     heroLogin.textContent='Log in';
     heroLogin.href='login.html';
     footerLogin.textContent='Log in';
@@ -320,6 +333,8 @@ async function renderAccount(){
   const learningUrl=hasStudent?'practice.html':'students.html';
   headerStart.href=learningUrl;
   heroStart.href=learningUrl;
+  headerStart.textContent=hasStudent?'Continue learning':'Choose student';
+  heroStart.textContent=hasStudent?'Continue learning':'Choose student';
   testPrep.href=learningUrl;
   skillPractice.href=learningUrl;
   progress.href=hasStudent?RSPCloud.progressUrl():'students.html';

@@ -691,7 +691,34 @@ CLOUDFLARE DEPLOYMENT SIMPLIFICATION
 - Removed _worker.js completely.
 - ReadySetPrep is now a static frontend for Cloudflare Pages / GitHub hosting.
 - Supabase handles authentication, student profiles, assessment data, and practice data.
-- Contact email is sent through a Supabase Edge Function named contact-email.
+- Contact email is sent through a separate Cloudflare Worker API named contact-email.
 - Cloudflare no longer needs Pages Functions, Workers, or an ASSETS binding.
-- The Contact page invokes the Supabase Edge Function through the existing
+- The Contact page invokes the separate Cloudflare Worker API through the existing
   browser Supabase client.
+
+
+OPTIONAL LOGIN / GUEST MODE
+- Login is no longer required to use ReadySetPrep.
+- Landing-page Get Started opens Practice directly.
+- Guests can use practice exercises, Primary tests, Lower tests, and local reports.
+- Guest assessment/practice history remains in that browser.
+- Signed-in users still get parent/student profiles and Supabase cloud sync.
+- Student-name inputs are editable for guests and locked to the selected profile
+  for signed-in students.
+
+
+GUEST CTA LABEL
+- Landing-page primary guest CTA now reads "Get started as Guest".
+- Login page guest-access button now reads "Get started as Guest".
+- When a signed-in student is selected, the landing CTA changes to
+  "Continue learning".
+
+
+CLOUDFLARE D1 BACKEND
+- Supabase is now used only for parent/guardian authentication.
+- ReadySetPrep application data is stored in Cloudflare D1.
+- A separate Cloudflare Worker API validates Supabase access tokens and provides
+  student/profile/state endpoints.
+- The Worker is NOT part of this Pages repository.
+- Contact email is also sent through the separate Worker API.
+- Guest practice remains available without login.

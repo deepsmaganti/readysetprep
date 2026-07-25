@@ -478,6 +478,38 @@ NO CLOUDFLARE WORKER VALIDATION
 - _worker.js removed
 - No functions/ directory
 - No /api/contact frontend dependency
-- Contact form invokes Supabase Edge Function: contact-email
+- Contact form invokes separate Cloudflare Worker API: contact-email
 - Cloudflare deployment is static-site only
 - JavaScript syntax checks: PASSED
+
+
+GUEST ACCESS VALIDATION
+- Login optional
+- Landing Get Started points to practice.html
+- Guest Practice access enabled
+- Guest Primary 2 tests enabled
+- Guest Lower tests enabled
+- Guest assessment history uses browser storage
+- Signed-in selected-student state still uses Supabase synchronization
+- Guest student-name fields editable
+- Signed-in selected-student fields read-only
+
+
+GUEST CTA VALIDATION
+- Header CTA: Get started as Guest
+- Hero CTA: Get started as Guest
+- Login guest button: Get started as Guest
+- Signed-in selected-student CTA: Continue learning
+
+
+CLOUDFLARE D1 ARCHITECTURE VALIDATION
+- Supabase database calls removed from frontend
+- Supabase retained for authentication only
+- Student/profile/state calls route to separate API base URL
+- Contact form routes to separate API Worker
+- Guest mode remains available without login
+- No _worker.js in Pages frontend
+- No functions/ directory in Pages frontend
+- Primary 2 concept practice remains 151 questions
+- Frontend JavaScript syntax checks: PASSED
+- Separate Worker JavaScript syntax check: PASSED

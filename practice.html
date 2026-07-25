@@ -735,9 +735,9 @@ function home(){
   <div class="mode-card section-choice untimed-card" data-section="reading"><h3>Reading</h3><p>18 questions</p></div>
   <div class="mode-card section-choice section-card" data-section="math"><h3>Mathematics</h3><p>24 questions</p></div>
  </div></div>
- <div class="input-row"><label for="studentName">Student name</label><input id="studentName" value="${escapeHtml(window.RSPCloud?.activeStudentName?.()||state.student||'')}" readonly /></div>
+ <div class="input-row"><label for="studentName">Student name</label><input id="studentName" value="${escapeHtml(window.RSPCloud?.activeStudentName?.()||state.student||'')}" ${window.RSPCloud?.activeStudentId?.()?'readonly':''} /></div>
  <div style="display:flex;gap:10px;flex-wrap:wrap"><button id="startBtn" class="btn btn-primary" disabled>Start</button>${saved?'<button id="resumeBtn" class="btn btn-secondary">Resume saved test</button><button id="clearBtn" class="btn btn-danger">Clear saved test</button>':''}</div>
- <div class="home-footer"><p class="footer-note">Works in Chrome on a Chromebook, Mac, or PC. Progress is saved to the selected student's account. Audio uses the device’s built-in voice.</p><a href="privacy.html">Privacy notice</a></div>
+ <div class="home-footer"><p class="footer-note">Works in Chrome on a Chromebook, Mac, or PC. Guest progress is saved in this browser. Signed-in student progress syncs across devices. Audio uses the device’s built-in voice.</p><a href="privacy.html">Privacy notice</a></div>
  </section></main>`;
 
  bindLevelNavigation();

@@ -187,17 +187,11 @@ document.getElementById('contactForm').addEventListener('submit',async event=>{
   submit.textContent='Sending…';
 
   try{
-    if(!RSPCloud.configured || !RSPCloud.client){
+    if(!RSPCloud.apiConfigured){
       throw new Error('Contact email is not configured yet.');
     }
 
-    const {data:result,error}=await RSPCloud.client.functions.invoke('contact-email',{
-      body:{name,email,topic,message}
-    });
-
-    if(error){
-      throw new Error(error.message||'Unable to send your message right now.');
-    }
+    const result=await RSPCloud.sendContact({name,email,topic,message});
     if(result?.error){
       throw new Error(result.error);
     }

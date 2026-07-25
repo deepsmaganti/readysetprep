@@ -1,0 +1,23 @@
+READYSETPREP — CLOUDFLARE PAGES FRONTEND
+
+This ZIP is the website package to upload/push to the existing ReadySetPrep
+GitHub repository connected to Cloudflare Pages.
+
+It contains:
+- static HTML
+- rsp-cloud.js
+- supabase-config.js
+
+It does NOT contain:
+- _worker.js
+- functions/ directory
+- D1 Worker source
+- Cloudflare API tokens
+
+Before deployment:
+1. Configure supabase-config.js.
+2. Deploy the separate D1 Worker backend.
+3. Confirm https://api.readysetprep.ai/health works.
+4. Push this frontend to the existing GitHub Pages/Cloudflare Pages repository.
+
+Guest access continues to work without login.

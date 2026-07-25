@@ -1,0 +1,72 @@
+READYSETPREP — SUPABASE AUTH + CLOUDFLARE D1
+
+ARCHITECTURE
+------------
+Cloudflare Pages:
+- hosts the ReadySetPrep static website
+- no _worker.js
+- no functions/ folder
+
+Supabase:
+- authentication only
+- parent/guardian email + password
+- no ReadySetPrep assessment database tables required
+
+Separate Cloudflare Worker:
+- hosted separately from the Pages repository
+- recommended production URL: https://api.readysetprep.ai
+- validates Supabase access tokens
+- reads/writes ReadySetPrep data in Cloudflare D1
+- sends Contact-form email
+
+Cloudflare D1:
+- profiles
+- students
+- assessment/practice/saved-test state
+
+GUEST MODE
+----------
+Guest access remains enabled.
+Guests can practice and take tests without login.
+Guest progress and reports stay in that browser.
+
+SIGNED-IN MODE
+--------------
+Parent/guardian logs in through Supabase Auth.
+They select a student.
+ReadySetPrep state is saved to Cloudflare D1 through the separate API Worker.
+
+FRONTEND CONFIG
+---------------
+Edit supabase-config.js:
+
+window.RSP_CONFIG = {
+  supabaseUrl: 'https://YOUR-PROJECT.supabase.co',
+  supabasePublishableKey: 'YOUR_SUPABASE_PUBLISHABLE_KEY',
+  apiBaseUrl: 'https://api.readysetprep.ai'
+};
+
+Never put these in browser code:
+- Supabase service-role/secret key
+- Cloudflare API token
+- Resend API key
+
+SUPABASE AUTH
+-------------
+In Supabase:
+1. Create a project.
+2. You do NOT need to run ReadySetPrep database SQL in Supabase.
+3. Authentication > URL Configuration:
+   Site URL:
+   https://readysetprep.ai
+
+   Redirect URL:
+   https://readysetprep.ai/login.html
+4. Copy the Project URL and Publishable key into supabase-config.js.
+
+D1 / WORKER
+-----------
+Deploy the separate backend package:
+ReadySetPrep_D1_Backend_Worker.zip
+
+Do not upload that backend package into the Cloudflare Pages GitHub repository.
