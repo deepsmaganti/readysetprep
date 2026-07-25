@@ -429,9 +429,14 @@ button,input{font:inherit}.app{min-height:100vh}.topbar{position:sticky;top:0;z-
 
 
 </style>
+<style>.rsp-cloud-protected{visibility:hidden}</style>
 </head>
-<body><a class="landing-home-link" href="index.html">⌂ Landing page</a>
+<body class="rsp-cloud-protected"><a class="landing-home-link" href="index.html">⌂ Landing page</a>
 <div id="app" class="app"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="rsp-cloud.js"></script>
+<script>RSPCloud.guardStudentPage();</script>
 <script>
 
 
@@ -446,7 +451,7 @@ const TEST_INFO = {
 };
 const TEST_ORDER=['primary2-test1','primary2-test2','primary2-test3','primary2-test4','primary2-test5','primary2-test6'];
 const TEST_SELECTION_KEY='readysetprep:selected-test:primary2';
-let selectedTestId=localStorage.getItem(TEST_SELECTION_KEY)||'primary2-test1';
+let selectedTestId=RSPStorage.getItem(TEST_SELECTION_KEY)||'primary2-test1';
 if(!TESTS[selectedTestId]) selectedTestId='primary2-test1';
 let TEST=TESTS[selectedTestId];
 function currentTestInfo(){return TEST_INFO[selectedTestId]}
@@ -524,11 +529,11 @@ const FULL_PASSAGE_PROGRESS_KEY='readysetprep:primary2-full-passage-progress:v1'
 let fullPassageSession=null;
 
 const LEVEL_STORAGE_KEY='readysetprep:selected-level';
-let selectedLevelId=localStorage.getItem(LEVEL_STORAGE_KEY)||'primary2';
+let selectedLevelId=RSPStorage.getItem(LEVEL_STORAGE_KEY)||'primary2';
 if(!LEVELS[selectedLevelId]) selectedLevelId='primary2';
 function selectedLevel(){return LEVELS[selectedLevelId]}
 
-function freshState(student=''){
+function freshState(student=(window.RSPCloud?.activeStudentName?.()||'')){
  return {
   screen:'home',mode:null,timed:false,sectionPractice:null,student,
   sectionIndex:0,qIndex:0,
@@ -548,10 +553,10 @@ function freshState(student=''){
 let state=freshState();
 let timerId=null;
 
-function save(){try{localStorage.setItem(STORAGE_KEY,JSON.stringify(state))}catch(e){}}
+function save(){try{RSPStorage.setItem(STORAGE_KEY,JSON.stringify(state))}catch(e){}}
 function load(){
  try{
-  const saved=JSON.parse(localStorage.getItem(STORAGE_KEY));
+  const saved=JSON.parse(RSPStorage.getItem(STORAGE_KEY));
   if(saved&&saved.answers){
    saved.timeLeft=saved.timeLeft||freshState().timeLeft;
    saved.flags=saved.flags||{auditory:{},reading:{},math:{}};
@@ -730,9 +735,9 @@ function home(){
   <div class="mode-card section-choice untimed-card" data-section="reading"><h3>Reading</h3><p>18 questions</p></div>
   <div class="mode-card section-choice section-card" data-section="math"><h3>Mathematics</h3><p>24 questions</p></div>
  </div></div>
- <div class="input-row"><label for="studentName">Student name</label><input id="studentName" value="${escapeHtml(state.student||'')}" /></div>
+ <div class="input-row"><label for="studentName">Student name</label><input id="studentName" value="${escapeHtml(window.RSPCloud?.activeStudentName?.()||state.student||'')}" readonly /></div>
  <div style="display:flex;gap:10px;flex-wrap:wrap"><button id="startBtn" class="btn btn-primary" disabled>Start</button>${saved?'<button id="resumeBtn" class="btn btn-secondary">Resume saved test</button><button id="clearBtn" class="btn btn-danger">Clear saved test</button>':''}</div>
- <div class="home-footer"><p class="footer-note">Works in Chrome on a Chromebook, Mac, or PC. Progress is saved in this browser. Audio uses the device’s built-in voice.</p><a href="privacy.html">Privacy notice</a></div>
+ <div class="home-footer"><p class="footer-note">Works in Chrome on a Chromebook, Mac, or PC. Progress is saved to the selected student's account. Audio uses the device’s built-in voice.</p><a href="privacy.html">Privacy notice</a></div>
  </section></main>`;
 
  bindLevelNavigation();
@@ -762,7 +767,7 @@ function home(){
  };
  if(saved){
   document.getElementById('resumeBtn').onclick=()=>{state=saved;state.screen=state.completed?'results':(state.screen==='home'?'intro':state.screen);render()};
-  document.getElementById('clearBtn').onclick=()=>{if(confirm('Clear the saved test and all answers?')){localStorage.removeItem(STORAGE_KEY);state.student='';home();}};
+  document.getElementById('clearBtn').onclick=()=>{if(confirm('Clear the saved test and all answers?')){RSPStorage.removeItem(STORAGE_KEY);state.student='';home();}};
  }
 }
 function selectTest(id){
@@ -772,7 +777,7 @@ function selectTest(id){
  save();
  const student=state.student||'';
  selectedTestId=id;
- localStorage.setItem(TEST_SELECTION_KEY,id);
+ RSPStorage.setItem(TEST_SELECTION_KEY,id);
  TEST=TESTS[id];
  STORAGE_KEY=storageKeyForTest(id);
  state=load()||freshState(student);
@@ -789,10 +794,10 @@ let practiceSession=null;
 let selectedPracticeSubject=null;
 
 function loadPracticeProgress(){
- try{return JSON.parse(localStorage.getItem(PRACTICE_PROGRESS_KEY))||{}}catch(e){return{}}
+ try{return JSON.parse(RSPStorage.getItem(PRACTICE_PROGRESS_KEY))||{}}catch(e){return{}}
 }
 function savePracticeProgress(progress){
- try{localStorage.setItem(PRACTICE_PROGRESS_KEY,JSON.stringify(progress))}catch(e){}
+ try{RSPStorage.setItem(PRACTICE_PROGRESS_KEY,JSON.stringify(progress))}catch(e){}
 }
 function practiceMastery(score,total){
  const pct=total?Math.round(score/total*100):0;
@@ -859,7 +864,7 @@ function showPracticeExercises(){
   document.querySelectorAll('[data-practice-level]').forEach(el=>el.onclick=()=>{
    selectedLevelId=el.dataset.practiceLevel;
    selectedPracticeSubject=null;
-   localStorage.setItem(LEVEL_STORAGE_KEY,selectedLevelId);
+   RSPStorage.setItem(LEVEL_STORAGE_KEY,selectedLevelId);
    showPracticeExercises();
   });
   document.querySelectorAll('[data-practice-subject]').forEach(el=>el.onclick=()=>{
@@ -912,7 +917,7 @@ function showPracticeExercises(){
  document.querySelectorAll('[data-practice-level]').forEach(el=>el.onclick=()=>{
   selectedLevelId=el.dataset.practiceLevel;
   selectedPracticeSubject=null;
-  localStorage.setItem(LEVEL_STORAGE_KEY,selectedLevelId);
+  RSPStorage.setItem(LEVEL_STORAGE_KEY,selectedLevelId);
   showPracticeExercises();
  });
  document.querySelectorAll('[data-concept]').forEach(el=>el.onclick=()=>startConceptPractice(el.dataset.concept));
@@ -931,12 +936,12 @@ function shuffledCopy(items){
 
 function loadFullPassageProgress(){
  try{
-  const value=JSON.parse(localStorage.getItem(FULL_PASSAGE_PROGRESS_KEY));
+  const value=JSON.parse(RSPStorage.getItem(FULL_PASSAGE_PROGRESS_KEY));
   return value&&typeof value==='object'?value:{};
  }catch(e){return{}}
 }
 function saveFullPassageProgress(value){
- try{localStorage.setItem(FULL_PASSAGE_PROGRESS_KEY,JSON.stringify(value))}catch(e){}
+ try{RSPStorage.setItem(FULL_PASSAGE_PROGRESS_KEY,JSON.stringify(value))}catch(e){}
 }
 function renderFullPassageCards(){
  const progress=loadFullPassageProgress();
@@ -1183,7 +1188,7 @@ function selectLevel(id){
  if(!LEVELS[id]) return;
  selectedLevelId=id;
  selectedPracticeSubject=null;
- localStorage.setItem(LEVEL_STORAGE_KEY,id);
+ RSPStorage.setItem(LEVEL_STORAGE_KEY,id);
  home();
 }
 function bindLevelNavigation(){
@@ -1442,7 +1447,7 @@ function results(){
  <div class="result-actions" style="display:flex;gap:10px;flex-wrap:wrap;margin:18px 0"><button class="btn btn-primary" onclick="window.print()">Print results</button><button class="btn btn-secondary" id="retakeBtn">Retake test</button><button class="btn btn-secondary" id="homeBtn">Back to start</button></div>
  ${completedSecs.includes('auditory')?`<details><summary><b>Show auditory passage transcript</b></summary><div class="transcript">${escapeHtml(TEST.auditory.passage)}</div></details>`:''}
  <h2 style="margin-top:28px">Answer review</h2>${review}</section></main>`;
- document.getElementById('retakeBtn').onclick=()=>{const student=state.student||'Student';localStorage.removeItem(STORAGE_KEY);state=freshState(student);home()};
+ document.getElementById('retakeBtn').onclick=()=>{const student=state.student||'Student';RSPStorage.removeItem(STORAGE_KEY);state=freshState(student);home()};
  document.getElementById('homeBtn').onclick=goHome;
 }
 function render(){

@@ -390,7 +390,6 @@ CONTACT PAGE VALIDATION
 DIRECT EMAIL VALIDATION
 - Visible contact email removed from contact.html
 - contact.html contains no mailto link
-- Contact form POSTs to /api/contact
 - Server-side functions use CONTACT_TO_EMAIL environment variable
 - RESEND_API_KEY is read only from server environment
 - JavaScript syntax checks: PASSED
@@ -425,11 +424,7 @@ PRIMARY 2 SUBJECT PICKER VALIDATION
 
 NO-FUNCTIONS-FOLDER VALIDATION
 - /functions directory removed
-- _worker.js added at repository root
-- /api/contact route retained
-- /api/access-approval route retained
 - static files forwarded through env.ASSETS
-- _worker.js syntax check: PASSED
 
 NO PAYMENT VALIDATION
 - payment.html removed
@@ -442,5 +437,47 @@ NO PAYMENT VALIDATION
 - Login redirects directly to practice.html
 - Landing page has no Pricing link
 - Contact page has no payment/billing topic
-- _worker.js keeps only /api/contact backend route
+- JavaScript syntax checks: PASSED
+
+
+SUPABASE ACCOUNT / STUDENT VALIDATION
+- Real Supabase signInWithPassword login wired
+- Real Supabase signUp flow wired
+- Parent/guardian profile table configured
+- Student profile table configured
+- Student state table configured
+- Row Level Security enabled on all account data tables
+- User ownership policies added for profiles, students, and student_state
+- Student selector page added
+- Practice/Test pages protected by authenticated-user + selected-student guard
+- Primary assessment history uses student-scoped RSPStorage
+- Lower assessment history uses student-scoped RSPStorage
+- Concept practice uses student-scoped RSPStorage
+- Full-passage practice uses student-scoped RSPStorage
+- Saved full-test/section state uses student-scoped RSPStorage
+- Existing raw browser data migrates to at most one first selected student
+- Account/student browser cache is namespaced by user ID + student ID
+- Landing page account state uses Supabase session
+- Contact page can prefill authenticated parent account
+- JavaScript syntax checks: PASSED
+
+
+FINAL ACCOUNT BUILD STRUCTURAL CHECK
+- Primary 2 practice modules: 20
+- Primary 2 concept-practice questions: 151
+- Total concept-practice questions: 276
+- Primary 2 full tests: 6
+- Each Primary 2 full test validated at 6 auditory / 18 reading / 24 math
+- Lower full tests: 2
+- Each Lower test validated at 34 verbal / 38 quantitative / 25 reading / 30 math + essay
+- All inline and shared JavaScript syntax checks passed
+- No ReadySetPrep destination email exposed in public HTML
+- Browser Supabase config contains placeholders only; no service-role key
+
+NO CLOUDFLARE WORKER VALIDATION
+- _worker.js removed
+- No functions/ directory
+- No /api/contact frontend dependency
+- Contact form invokes Supabase Edge Function: contact-email
+- Cloudflare deployment is static-site only
 - JavaScript syntax checks: PASSED

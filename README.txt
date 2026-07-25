@@ -599,9 +599,7 @@ CONTACT PAGE
 DIRECT EMAIL DELIVERY
 - Contact form no longer displays the ReadySetPrep email address.
 - Contact form no longer uses mailto or opens the user's email application.
-- Contact messages POST to /api/contact and are sent server-side.
   server-side.
-- Added Cloudflare Pages advanced-mode backend: _worker.js
 - The destination mailbox is configured server-side through CONTACT_TO_EMAIL.
 - Configure CONTACT_TO_EMAIL as readysetprepai@gmail.com in Cloudflare.
 - Requires RESEND_API_KEY and CONTACT_FROM_EMAIL.
@@ -649,7 +647,6 @@ PRIMARY 2 SUBJECT PICKER
 GITHUB-UPLOAD SIMPLIFICATION
 - Removed the nested /functions folder.
 - Direct Contact email and access approval are now handled by one root file:
-  _worker.js
 - This uses Cloudflare Pages advanced mode.
 - All website files can now be uploaded at the repository root through the
   GitHub web interface.
@@ -658,4 +655,43 @@ NO PAYMENT VERSION
 - Payment, trial, Venmo, subscription, and access-code approval features were removed.
 - Users can open Practice and test pages directly.
 - Login now goes directly to Practice.
-- Contact email remains available through the Contact page and _worker.js.
+
+
+ACCOUNT-BASED ASSESSMENT TRACKING
+- Replaced the browser-only demo login with Supabase email/password authentication.
+- Added students.html for multiple student profiles under one parent/guardian account.
+- Practice/Test pages require:
+  1. an authenticated account
+  2. a selected student
+- Selected student name is locked into test attempts so reports are assigned to
+  the active student profile.
+- Existing Primary 2 and Lower assessment report UIs are preserved.
+- Assessment history, concept practice, full-passage practice, and saved test
+  attempts are synchronized to Supabase through student_state.
+- Local browser cache is namespaced by user ID + student ID so two students on
+  the same device do not share assessment history.
+- First-student migration can import existing browser-saved ReadySetPrep data.
+- Landing-page Get Started / Practice / Progress links are account-aware.
+- Added a floating Student / Switch control on protected learning pages.
+
+NEW FILES
+- students.html
+- supabase-config.js
+- rsp-cloud.js
+- SUPABASE_SETUP.sql
+- SUPABASE_SETUP.txt
+
+DEPLOYMENT
+- Run SUPABASE_SETUP.sql in Supabase.
+- Configure Supabase Auth URLs for readysetprep.ai.
+- Put the project URL and browser publishable key in supabase-config.js.
+- Never place a Supabase service-role/secret key in browser code.
+
+CLOUDFLARE DEPLOYMENT SIMPLIFICATION
+- Removed _worker.js completely.
+- ReadySetPrep is now a static frontend for Cloudflare Pages / GitHub hosting.
+- Supabase handles authentication, student profiles, assessment data, and practice data.
+- Contact email is sent through a Supabase Edge Function named contact-email.
+- Cloudflare no longer needs Pages Functions, Workers, or an ASSETS binding.
+- The Contact page invokes the Supabase Edge Function through the existing
+  browser Supabase client.

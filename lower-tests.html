@@ -776,7 +776,12 @@ body{
 
 
 
-</style></head><body><div id="app"></div>
+</style><style>.rsp-cloud-protected{visibility:hidden}</style>
+</head><body class="rsp-cloud-protected"><div id="app"></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="rsp-cloud.js"></script>
+<script>RSPCloud.guardStudentPage();</script>
 <script>
 
 
@@ -786,7 +791,7 @@ const INFO={'lower-test1':'Test 1','lower-test2':'Test 2'};
 const SECTIONS=['verbal','quantitative','reading','math','essay'];
 const LABELS={verbal:'Verbal Reasoning',quantitative:'Quantitative Reasoning',reading:'Reading Comprehension',math:'Mathematics Achievement',essay:'Essay'};
 const TEST_SELECTION_KEY='readysetprep:selected-test:lower';
-let selectedTestId=new URLSearchParams(location.search).get('test')==='2'?'lower-test2':(localStorage.getItem(TEST_SELECTION_KEY)||'lower-test1');
+let selectedTestId=new URLSearchParams(location.search).get('test')==='2'?'lower-test2':(RSPStorage.getItem(TEST_SELECTION_KEY)||'lower-test1');
 if(!LOWER_TESTS[selectedTestId])selectedTestId='lower-test1';
 let TEST=LOWER_TESTS[selectedTestId];
 let timerId=null;
@@ -799,14 +804,14 @@ function sectionQuestions(sec){
  if(sec==='essay')return[];
  return TEST[sec].questions;
 }
-function freshState(student=''){
+function freshState(student=(window.RSPCloud?.activeStudentName?.()||'')){
  const timeLeft={};const answers={},flags={},eliminations={},submitted={},alerted={};
  SECTIONS.forEach(sec=>{timeLeft[sec]=TEST[sec].minutes*60;answers[sec]={};flags[sec]={};eliminations[sec]={};submitted[sec]=false;alerted[sec]=false});
  return {screen:'home',student,mode:null,timed:false,sectionPractice:null,sectionIndex:0,qIndex:0,answers,flags,highlights:{},eliminations,timeLeft,submitted,alerted,essayText:'',completed:false,attemptId:`lower-${Date.now()}-${Math.random().toString(36).slice(2,8)}`,assessmentId:null,completedAt:null};
 }
 let state=load()||freshState();
-function save(){try{localStorage.setItem(key(),JSON.stringify(state))}catch(e){}}
-function load(){try{const x=JSON.parse(localStorage.getItem(key()));if(x&&x.answers){const f=freshState(x.student||'');return Object.assign(f,x,{answers:{...f.answers,...x.answers},flags:{...f.flags,...x.flags},highlights:x.highlights||{},eliminations:{...f.eliminations,...x.eliminations},timeLeft:{...f.timeLeft,...x.timeLeft},submitted:{...f.submitted,...x.submitted},alerted:{...f.alerted,...x.alerted}})}}catch(e){}return null}
+function save(){try{RSPStorage.setItem(key(),JSON.stringify(state))}catch(e){}}
+function load(){try{const x=JSON.parse(RSPStorage.getItem(key()));if(x&&x.answers){const f=freshState(x.student||'');return Object.assign(f,x,{answers:{...f.answers,...x.answers},flags:{...f.flags,...x.flags},highlights:x.highlights||{},eliminations:{...f.eliminations,...x.eliminations},timeLeft:{...f.timeLeft,...x.timeLeft},submitted:{...f.submitted,...x.submitted},alerted:{...f.alerted,...x.alerted}})}}catch(e){}return null}
 function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]))}
 
 function normalizeHighlightRanges(ranges,textLength){
@@ -900,17 +905,17 @@ function estStanine(p){if(p<35)return 1;if(p<45)return 2;if(p<55)return 3;if(p<6
 function stopTimer(){if(timerId){clearInterval(timerId);timerId=null}}
 function playAlert(sec){if(state.alerted[sec])return;state.alerted[sec]=true;try{const A=window.AudioContext||window.webkitAudioContext;if(A){const ctx=new A();[0,.28].forEach((st,i)=>{const o=ctx.createOscillator(),g=ctx.createGain();o.frequency.value=i?1046:880;g.gain.setValueAtTime(.001,ctx.currentTime+st);g.gain.exponentialRampToValueAtTime(.2,ctx.currentTime+st+.02);g.gain.exponentialRampToValueAtTime(.001,ctx.currentTime+st+.22);o.connect(g);g.connect(ctx.destination);o.start(ctx.currentTime+st);o.stop(ctx.currentTime+st+.24)});setTimeout(()=>ctx.close(),900)}}catch(e){}const n=document.createElement('div');n.className='minute-alert';n.innerHTML=`🔔 <b>1 minute remaining</b> in ${LABELS[sec]}`;document.body.appendChild(n);setTimeout(()=>n.remove(),5000);save()}
 function startTimer(){stopTimer();const sec=currentSec();if(!state.timed||!['question','essay'].includes(state.screen))return;if(state.timeLeft[sec]===60)playAlert(sec);timerId=setInterval(()=>{state.timeLeft[sec]--;const el=document.querySelector('.timer');if(el){el.textContent=fmt(state.timeLeft[sec]);el.classList.toggle('warn',state.timeLeft[sec]<=60)}if(state.timeLeft[sec]===60)playAlert(sec);if(state.timeLeft[sec]<=0){stopTimer();state.submitted[sec]=true;save();alert(`Time is up for ${LABELS[sec]}.`);finishSection(true)}save()},1000)}
-function selectTest(id){if(!LOWER_TESTS[id]||id===selectedTestId)return;stopTimer();save();selectedTestId=id;TEST=LOWER_TESTS[id];localStorage.setItem(TEST_SELECTION_KEY,id);state=load()||freshState(state.student||'');state.screen='home';home()}
+function selectTest(id){if(!LOWER_TESTS[id]||id===selectedTestId)return;stopTimer();save();selectedTestId=id;TEST=LOWER_TESTS[id];RSPStorage.setItem(TEST_SELECTION_KEY,id);state=load()||freshState(state.student||'');state.screen='home';home()}
 function goMain(){stopTimer();save();location.href='index.html'}
 
 const LOWER_ASSESSMENT_KEY='readysetprep:assessments:lower:v1';
 
 function loadAssessmentHistory(){
- try{const value=JSON.parse(localStorage.getItem(LOWER_ASSESSMENT_KEY));return Array.isArray(value)?value:[]}
+ try{const value=JSON.parse(RSPStorage.getItem(LOWER_ASSESSMENT_KEY));return Array.isArray(value)?value:[]}
  catch(e){return[]}
 }
 function saveAssessmentHistory(items){
- try{localStorage.setItem(LOWER_ASSESSMENT_KEY,JSON.stringify(items.slice(0,40)))}catch(e){}
+ try{RSPStorage.setItem(LOWER_ASSESSMENT_KEY,JSON.stringify(items.slice(0,40)))}catch(e){}
 }
 function assessmentBand(percent){
  if(percent>=90)return {label:'Excellent practice performance',className:'excellent'};
@@ -1205,7 +1210,7 @@ function home(){
 
   <div class="input-row">
    <label for="student"><b>Student name</b></label>
-   <input id="student" value="${esc(state.student||'')}">
+   <input id="student" value="${esc(window.RSPCloud?.activeStudentName?.()||state.student||'')}" readonly>
   </div>
 
   <div class="home-actions">
@@ -1216,7 +1221,7 @@ function home(){
   </div>
 
   <div class="home-footer">
-   <p class="footer-note">Progress and assessments are stored only in this browser.</p>
+   <p class="footer-note">Progress and assessment reports are saved to the selected student's ReadySetPrep account.</p>
    <a href="privacy.html">Privacy notice</a>
   </div>
  </section></main>`;
@@ -1269,7 +1274,7 @@ function home(){
   };
   document.getElementById('clear').onclick=()=>{
    if(confirm('Clear this saved Lower Level test?')){
-    localStorage.removeItem(key());
+    RSPStorage.removeItem(key());
     state=freshState();
     home();
    }
@@ -1347,7 +1352,7 @@ function results(){
   ${reviewHtml?`<h2>Answer review</h2>${reviewHtml}`:''}
  </section></main>`;
  document.getElementById('assessmentHistoryResults').onclick=showLowerAssessmentHistory;
- document.getElementById('retake').onclick=()=>{const st=state.student;localStorage.removeItem(key());state=freshState(st);home()};
+ document.getElementById('retake').onclick=()=>{const st=state.student;RSPStorage.removeItem(key());state=freshState(st);home()};
  document.getElementById('home').onclick=home;
  document.getElementById('main').onclick=goMain;
 }

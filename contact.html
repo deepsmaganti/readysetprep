@@ -139,23 +139,24 @@ h1{margin:0 0 8px;font-size:36px;letter-spacing:-.035em}
       </div>
     </form>
 
-    <div class="note"><b>Privacy:</b> Your message is sent directly to ReadySetPrep. The destination email address is not shown on this page.</div>
+    <div class="note"><b>Privacy:</b> Your message is sent through ReadySetPrep's server-side email function. The destination email address is not shown on this page.</div>
   </section>
 </main>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="rsp-cloud.js"></script>
 <script>
-const PROFILE_KEY='readysetprep:user:v1';
-
-function readProfile(){
-  try{return JSON.parse(localStorage.getItem(PROFILE_KEY))}
-  catch(error){return null}
-}
-
-const profile=readProfile();
-if(profile){
-  document.getElementById('name').value=profile.name||'';
-  document.getElementById('email').value=profile.email||'';
-}
+(async()=>{
+  if(!RSPCloud.configured)return;
+  const user=await RSPCloud.getUser();
+  if(!user)return;
+  document.getElementById('email').value=user.email||'';
+  try{
+    const profile=await RSPCloud.loadProfile();
+    if(profile?.displayName)document.getElementById('name').value=profile.displayName;
+  }catch(error){}
+})();
 
 document.getElementById('contactForm').addEventListener('submit',async event=>{
   event.preventDefault();
@@ -186,15 +187,19 @@ document.getElementById('contactForm').addEventListener('submit',async event=>{
   submit.textContent='Sending…';
 
   try{
-    const response=await fetch('/api/contact',{
-      method:'POST',
-      headers:{'Content-Type':'application/json'},
-      body:JSON.stringify({name,email,topic,message})
+    if(!RSPCloud.configured || !RSPCloud.client){
+      throw new Error('Contact email is not configured yet.');
+    }
+
+    const {data:result,error}=await RSPCloud.client.functions.invoke('contact-email',{
+      body:{name,email,topic,message}
     });
 
-    const result=await response.json().catch(()=>({}));
-    if(!response.ok){
-      throw new Error(result.error||'Unable to send your message right now.');
+    if(error){
+      throw new Error(error.message||'Unable to send your message right now.');
+    }
+    if(result?.error){
+      throw new Error(result.error);
     }
 
     document.getElementById('messageText').value='';

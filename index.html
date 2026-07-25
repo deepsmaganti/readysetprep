@@ -209,11 +209,11 @@ button{font:inherit}
 
     <div class="header-actions" id="signedOut">
       <a class="btn btn-secondary" href="login.html">Log in</a>
-      <a class="btn btn-primary" href="practice.html">Get started</a>
+      <a class="btn btn-primary" href="login.html" id="headerStart">Get started</a>
     </div>
 
     <div class="user-area" id="signedIn">
-      <span class="user-name" id="userName">Student</span>
+      <a class="user-name" id="userName" href="students.html">Account</a>
       <button class="logout" id="logout" type="button">Log out</button>
     </div>
   </div>
@@ -225,7 +225,7 @@ button{font:inherit}
       <h1>Practice. Review. Improve.</h1>
       <p>ReadySetPrep gives students focused practice, clear explanations, and useful next steps.</p>
       <div class="hero-actions">
-        <a class="btn btn-primary" href="practice.html">Get started</a>
+        <a class="btn btn-primary" href="login.html" id="heroStart">Get started</a>
         <a class="btn btn-secondary" href="login.html" id="heroLogin">Log in</a>
       </div>
     </div>
@@ -238,21 +238,21 @@ button{font:inherit}
           <div class="option-icon">T</div>
           <h2>Test Preparation</h2>
           <p>Practice complete tests or focus on one section at a time.</p>
-          <a class="btn btn-primary" href="practice.html">Explore tests</a>
+          <a class="btn btn-primary" href="login.html" id="testPrepLink">Explore tests</a>
         </article>
 
         <article class="option">
           <div class="option-icon">S</div>
           <h2>Skill Practice</h2>
           <p>Build reading, math, reasoning, and writing skills with focused practice.</p>
-          <a class="btn btn-primary" href="practice.html">Practice skills</a>
+          <a class="btn btn-primary" href="login.html" id="skillPracticeLink">Practice skills</a>
         </article>
 
         <article class="option">
           <div class="option-icon">P</div>
           <h2>Progress</h2>
           <p>Review completed work and see what to practice next.</p>
-          <a class="btn btn-primary" href="primary-tests.html?view=history">View reports</a>
+          <a class="btn btn-primary" href="login.html" id="progressLink">View reports</a>
         </article>
       </div>
 </div>
@@ -266,45 +266,77 @@ button{font:inherit}
       <a href="contact.html">Contact</a>
       <a href="privacy.html">Privacy</a>
       <a href="practice.html">Practice</a>
-      <a href="login.html">Log in</a>
+      <a href="login.html" id="footerLogin">Log in</a>
     </div>
   </div>
 </footer>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="supabase-config.js"></script>
+<script src="rsp-cloud.js"></script>
 <script>
-const PROFILE_KEY='readysetprep:user:v1';
-
-function readProfile(){
-  try{return JSON.parse(localStorage.getItem(PROFILE_KEY))}
-  catch(error){return null}
-}
-function displayName(profile){
-  if(profile?.name)return profile.name;
-  const local=(profile?.email||'Student').split('@')[0];
-  return local.replace(/[._-]+/g,' ').replace(/\b\w/g,letter=>letter.toUpperCase());
-}
-function renderProfile(){
-  const profile=readProfile();
+async function renderAccount(){
   const signedOut=document.getElementById('signedOut');
   const signedIn=document.getElementById('signedIn');
   const heroLogin=document.getElementById('heroLogin');
+  const headerStart=document.getElementById('headerStart');
+  const heroStart=document.getElementById('heroStart');
+  const testPrep=document.getElementById('testPrepLink');
+  const skillPractice=document.getElementById('skillPracticeLink');
+  const progress=document.getElementById('progressLink');
+  const footerLogin=document.getElementById('footerLogin');
 
-  if(profile){
-    signedOut.style.display='none';
-    signedIn.style.display='flex';
-    document.getElementById('userName').textContent=displayName(profile);
-    heroLogin.textContent='Continue learning';
-    heroLogin.href='#start';
-  }else{
+  if(!RSPCloud.configured){
     signedOut.style.display='flex';
     signedIn.style.display='none';
+    return;
   }
+
+  const user=await RSPCloud.getUser();
+  if(!user){
+    signedOut.style.display='flex';
+    signedIn.style.display='none';
+    [headerStart,heroStart,testPrep,skillPractice,progress].forEach(link=>link.href='login.html');
+    heroLogin.textContent='Log in';
+    heroLogin.href='login.html';
+    footerLogin.textContent='Log in';
+    footerLogin.href='login.html';
+    return;
+  }
+
+  signedOut.style.display='none';
+  signedIn.style.display='flex';
+
+  let displayName=user.user_metadata?.display_name||user.email?.split('@')[0]||'Account';
+  try{
+    const profile=await RSPCloud.loadProfile();
+    if(profile?.displayName)displayName=profile.displayName;
+  }catch(error){}
+
+  const studentName=RSPCloud.activeStudentName();
+  document.getElementById('userName').textContent=studentName?`${displayName} · ${studentName}`:displayName;
+
+  const hasStudent=Boolean(RSPCloud.activeStudentId());
+  const learningUrl=hasStudent?'practice.html':'students.html';
+  headerStart.href=learningUrl;
+  heroStart.href=learningUrl;
+  testPrep.href=learningUrl;
+  skillPractice.href=learningUrl;
+  progress.href=hasStudent?RSPCloud.progressUrl():'students.html';
+
+  heroLogin.textContent=hasStudent?'Continue learning':'Choose student';
+  heroLogin.href=learningUrl;
+
+  footerLogin.textContent='Account';
+  footerLogin.href='students.html';
 }
-document.getElementById('logout').addEventListener('click',()=>{
-  localStorage.removeItem(PROFILE_KEY);
-  renderProfile();
+
+document.getElementById('logout').addEventListener('click',async()=>{
+  await RSPCloud.signOut();
+  await renderAccount();
 });
-renderProfile();
+
+renderAccount();
 </script>
 </body>
 </html>
