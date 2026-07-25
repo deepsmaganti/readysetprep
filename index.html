@@ -339,8 +339,8 @@ async function renderAccount(){
   skillPractice.href=learningUrl;
   progress.href=hasStudent?RSPCloud.progressUrl():'students.html';
 
-  heroLogin.textContent=hasStudent?'Continue learning':'Choose student';
-  heroLogin.href=learningUrl;
+  heroLogin.textContent=hasStudent?'Switch student':'Manage students';
+  heroLogin.href='students.html';
 
   footerLogin.textContent='Account';
   footerLogin.href='students.html';
