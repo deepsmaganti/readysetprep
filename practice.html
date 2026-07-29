@@ -688,7 +688,7 @@ function home(){
      <div class="level-overview" style="border-top:5px solid ${level.accent}">
        <span class="badge" style="background:${level.soft};color:${level.accent}">${escapeHtml(level.subtitle)}</span>
        <h2>${escapeHtml(level.label)} Level</h2>
-       <p>${selectedLevelId==='primary2'?'Six complete interactive Primary 2 tests are available.':selectedLevelId==='lower'?'Two complete interactive Lower Level tests are available.':'Concept practice is available now. Full practice tests can be added without changing the student experience.'}</p>
+       <p>${selectedLevelId==='primary2'?'Six complete interactive Primary 2 tests are available.':selectedLevelId==='lower'?'Six complete interactive Lower Level tests are available.':'Concept practice is available now. Full practice tests can be added without changing the student experience.'}</p>
        <div class="blueprint-grid">${blueprint}</div>
        ${selectedLevelId==='primary2'?`
        <div class="practice-launch-bar"><div><b>Practice Exercises</b><span>Build mastery one concept at a time</span></div><button class="btn btn-primary" id="openLevelExercises">Open exercises</button></div>
@@ -701,9 +701,8 @@ function home(){
        <div class="practice-launch-bar"><div><b>Practice Exercises</b><span>Build mastery one concept at a time</span></div><button class="btn btn-primary" id="openLevelExercises">Open exercises</button></div>
        <div class="test-heading">Choose a Lower Level practice test</div>
        <div class="test-picker linked-test-picker">
-        <a class="test-option" href="lower-tests.html?test=1"><strong>Test 1</strong></a>
-        <a class="test-option" href="lower-tests.html?test=2"><strong>Test 2</strong></a>
-       </div>
+${[1,2,3,4,5,6].map(number=>`<a class="test-option" href="lower-tests.html?test=${number}"><strong>Test ${number}</strong></a>`).join('')}
+</div>
 
       `:`<div class="coming-soon"><b>Concept practice is available now.</b> Full practice tests for this level can be added separately.</div><div style="margin-top:15px"><button class="btn btn-primary" id="openLevelExercises">Open ${escapeHtml(level.label)} practice exercises</button></div>`}
      </div>
