@@ -1,0 +1,669 @@
+READYSETPREP — PROJECT NOTES
+Last consolidated: July 29, 2026
+
+======================================================================
+1. PROJECT OVERVIEW
+======================================================================
+
+ReadySetPrep is a static educational practice website currently focused on
+ISEE preparation.
+
+Current production architecture:
+
+readysetprep.ai
+    -> Cloudflare Pages
+    -> static frontend
+
+api.readysetprep.ai
+    -> separate Cloudflare Worker
+    -> Cloudflare D1
+
+Supabase
+    -> authentication only
+
+Guest access remains available without login.
+
+
+======================================================================
+2. FRONTEND FILES
+======================================================================
+
+Main website files:
+
+- index.html
+  Landing page and signed-in student selection experience.
+
+- login.html
+  Supabase parent/guardian login and account creation.
+
+- students.html
+  Add, edit, select, and manage student profiles.
+
+- practice.html
+  Practice hub for Primary 2 and Lower Level concept practice.
+
+- primary-tests.html
+  Primary 2 full-test experience.
+
+- lower-tests.html
+  Lower Level full-test experience.
+
+- contact.html
+  Contact form.
+
+- privacy.html
+  Privacy notice.
+
+- rsp-cloud.js
+  Shared account, student, storage, and Cloudflare API integration.
+
+- supabase-config.js
+  Browser configuration for Supabase Auth and the Cloudflare API URL.
+
+IMPORTANT:
+Do not replace a working supabase-config.js with placeholder values when
+updating the rest of the site.
+
+
+======================================================================
+3. FRONTEND CONFIGURATION
+======================================================================
+
+supabase-config.js should contain:
+
+window.RSP_CONFIG = {
+  supabaseUrl: 'YOUR_REAL_SUPABASE_PROJECT_URL',
+  supabasePublishableKey: 'YOUR_REAL_SUPABASE_PUBLISHABLE_KEY',
+  apiBaseUrl: 'https://api.readysetprep.ai'
+};
+
+Use the Supabase publishable/browser key.
+
+Never place these in frontend/browser code:
+
+- Supabase service-role or secret key
+- Cloudflare API token
+- Resend API key
+
+
+======================================================================
+4. CLOUDFLARE PAGES DEPLOYMENT
+======================================================================
+
+The frontend GitHub repository connected to Cloudflare Pages should contain
+only the static website files.
+
+Do NOT add:
+
+- _worker.js
+- functions/ directory
+- backend Worker source
+- Cloudflare API tokens
+
+Recommended deployment flow:
+
+1. Update the required frontend files in GitHub.
+2. Preserve the real values already stored in supabase-config.js.
+3. Commit/push to the production branch.
+4. Cloudflare Pages automatically deploys the new commit.
+5. Confirm the deployment shows Success.
+6. Hard-refresh the website if an older version is cached.
+
+Cloudflare Pages should remain a static-site deployment.
+
+
+======================================================================
+5. BACKEND / D1 ARCHITECTURE
+======================================================================
+
+The backend runs separately at:
+
+https://api.readysetprep.ai
+
+The Worker:
+
+- validates Supabase access tokens
+- reads and writes ReadySetPrep data in Cloudflare D1
+- handles student/profile state
+- handles signed-in progress synchronization
+- handles the Contact form when email settings are configured
+
+D1 database:
+
+readysetprep-db
+
+D1 binding name:
+
+DB
+
+Current D1 tables:
+
+- profiles
+- students
+- student_state
+
+Student state is scoped to the authenticated Supabase user.
+
+
+======================================================================
+6. WORKER ENVIRONMENT VARIABLES
+======================================================================
+
+Required for authentication/data:
+
+- ALLOWED_ORIGINS
+- SUPABASE_URL
+- SUPABASE_PUBLISHABLE_KEY
+
+Recommended ALLOWED_ORIGINS:
+
+https://readysetprep.ai,https://www.readysetprep.ai
+
+Contact-form email variables:
+
+- RESEND_API_KEY
+- CONTACT_TO_EMAIL
+- CONTACT_FROM_EMAIL
+
+Health check:
+
+https://api.readysetprep.ai/health
+
+Expected result should indicate that the ReadySetPrep API is running.
+
+
+======================================================================
+7. SUPABASE AUTH SETUP
+======================================================================
+
+Supabase is used for authentication only.
+
+Site URL:
+
+https://readysetprep.ai
+
+Redirect URL:
+
+https://readysetprep.ai/login.html
+
+Signed-in users authenticate as the parent/guardian.
+
+Multiple devices can use the same account unless Supabase is explicitly
+configured to restrict users to a single session.
+
+
+======================================================================
+8. GUEST MODE
+======================================================================
+
+Login is optional.
+
+Guest users can:
+
+- open Practice
+- take Primary 2 tests
+- take Lower Level tests
+- view locally generated assessment history
+
+Guest progress stays in the browser/localStorage and does not synchronize
+across devices.
+
+
+======================================================================
+9. SIGNED-IN STUDENT EXPERIENCE
+======================================================================
+
+After login:
+
+- the home page displays available student names
+- clicking a student selects that student's profile
+- if no students exist, the home page shows + Add student
+- student-specific state can sync through the Worker and D1
+
+The same parent/guardian account may be used on multiple laptops.
+Signed-in devices should see the same student profiles after synchronization.
+
+
+======================================================================
+10. PRIMARY 2 FULL TESTS
+======================================================================
+
+File:
+
+primary-tests.html
+
+Tests:
+
+6 complete Primary 2 tests
+
+Each test contains:
+
+- Auditory Comprehension: 6 questions / 7 minutes
+- Reading: 18 questions / 20 minutes
+- Mathematics: 24 questions / 26 minutes
+
+Available modes:
+
+- Timed Full Test
+- Untimed Full Test
+- Timed by Section
+- Untimed by Section
+
+Direct test links:
+
+primary-tests.html?test=1
+primary-tests.html?test=2
+primary-tests.html?test=3
+primary-tests.html?test=4
+primary-tests.html?test=5
+primary-tests.html?test=6
+
+Auditory behavior:
+
+- passage text is hidden during active testing
+- passage is read aloud
+- questions and answer choices are read aloud
+- question and answer-choice text remains visible
+- review/transcript is available after testing
+
+Primary 2 full tests retain coverage of:
+
+Reading:
+- main idea
+- details
+- inference
+- sequence
+- vocabulary
+- author purpose
+
+Mathematics:
+- number sense
+- place value
+- operations
+- graphs/data
+- fractions
+- measurement
+- geometry
+- symmetry
+- probability
+- equal sharing
+- multi-step arithmetic
+
+
+======================================================================
+11. PRIMARY 2 PRACTICE
+======================================================================
+
+File:
+
+practice.html
+
+Primary 2 currently has:
+
+- 20 concept modules
+- 10 questions per concept
+- 200 concept-practice questions total
+
+Difficulty rises within every concept:
+
+Questions 1-2:
+Foundation
+
+Questions 3-6:
+On-level
+
+Questions 7-10:
+Challenge
+
+Question order is intentionally not shuffled inside these progressive
+concept modules.
+
+Primary 2 practice is separated into:
+
+- Reading
+- Mathematics
+
+Reading includes full-passage practice.
+
+Practice features include:
+
+- immediate feedback
+- explanations
+- concept tracking
+- mixed practice within the selected subject
+- saved progress
+
+
+======================================================================
+12. LOWER LEVEL FULL TESTS
+======================================================================
+
+File:
+
+lower-tests.html
+
+There are 6 complete Lower Level tests.
+
+Each contains:
+
+- Verbal Reasoning: 34 questions / 20 minutes
+- Quantitative Reasoning: 38 questions / 35 minutes
+- Reading Comprehension: 25 questions / 25 minutes
+- Mathematics Achievement: 30 questions / 30 minutes
+- Essay: 30 minutes
+
+Each Reading section contains:
+
+- 5 passages
+- 5 questions per passage
+
+Available modes:
+
+- Timed Full Test
+- Untimed Full Test
+- Timed by Section
+- Untimed by Section
+
+Main UI should display:
+
+Test 1
+Test 2
+Test 3
+Test 4
+Test 5
+Test 6
+
+The six tests are intentionally written so that later tests are more
+challenging than earlier tests.
+
+The UI does NOT display difficulty labels to students.
+
+Later tests progressively use:
+
+- more sophisticated vocabulary
+- subtler sentence-completion distractors
+- more multi-step quantitative reasoning
+- more involved fractions, ratios, percentages, averages, probability,
+  geometry, and numerical relationships
+- longer and denser reading passages
+- more inference, synthesis, evidence, and author-reasoning questions
+- more demanding mathematics items
+
+These are ReadySetPrep practice tests and not official ISEE test forms.
+
+
+======================================================================
+13. LOWER LEVEL PRACTICE
+======================================================================
+
+Lower Level practice is separated into:
+
+- Verbal Reasoning
+- Quantitative Reasoning
+- Reading Comprehension
+- Mathematics Achievement
+
+Concept practice uses progressive difficulty within each module rather than
+randomly presenting all difficulty levels.
+
+Current Lower practice includes:
+
+- 5 concept modules
+- 40 concept-practice questions
+
+Practice questions move from foundation skills toward more challenging
+reasoning within each concept.
+
+
+======================================================================
+14. ASSESSMENT REPORTS
+======================================================================
+
+Assessment reports are section-specific.
+
+Overall Strengths / Focus Areas were removed.
+
+Primary 2 reports separately assess:
+
+- Auditory Comprehension
+- Reading
+- Mathematics
+
+Lower Level reports separately assess:
+
+- Verbal Reasoning
+- Quantitative Reasoning
+- Reading Comprehension
+- Mathematics Achievement
+
+Each completed section shows:
+
+- section score
+- section accuracy
+- estimated practice stanine
+- unanswered count
+- section-specific strengths
+- section-specific improvement areas
+- section-specific concept breakdown
+- section-specific next steps
+
+Overall total score and overall accuracy may still appear as summary metrics,
+but strengths and improvement recommendations are derived separately by
+section.
+
+Flags:
+
+- shown for reference
+- do not affect score
+- do not affect strengths
+- do not affect improvement areas
+- do not affect recommendations
+
+Lower Level also keeps the essay writing snapshot.
+
+Assessment history supports:
+
+- multiple tests
+- timed vs untimed
+- full test vs section practice
+- viewing reports
+- deleting reports
+- filtering history
+- older saved assessment records
+
+
+======================================================================
+15. READING AND TEST-TAKING FEATURES
+======================================================================
+
+Reading features:
+
+- passage highlighting
+- toggle an existing highlight off
+- clear all highlights
+- highlights stored by passage
+
+Test-taking features:
+
+- Flag for Review
+- section navigation
+- answer review
+- saved test state
+- timers for timed modes
+- student-specific state for signed-in users
+
+
+======================================================================
+16. CONTACT FORM
+======================================================================
+
+contact.html submits through the separate Cloudflare Worker API.
+
+The public HTML should not expose:
+
+- RESEND_API_KEY
+- private email credentials
+
+Worker contact-email configuration requires:
+
+- RESEND_API_KEY
+- CONTACT_TO_EMAIL
+- CONTACT_FROM_EMAIL
+
+If these are not configured, the contact form may report that email is not
+configured.
+
+
+======================================================================
+17. COPYRIGHT / CONTENT RULE
+======================================================================
+
+All ReadySetPrep test content must remain original.
+
+Official and third-party sample materials may be used only to understand:
+
+- public test structure
+- timing
+- skill categories
+- broad question formats
+
+Do NOT:
+
+- copy proprietary questions
+- closely paraphrase proprietary questions
+- copy passages
+- recreate proprietary illustrations
+- trace proprietary layouts
+- reuse answer choices or explanations
+
+New passages, questions, choices, explanations, charts, illustrations, and
+audio scripts should be original ReadySetPrep content.
+
+
+======================================================================
+18. CURRENT VALIDATION / QA SUMMARY
+======================================================================
+
+Primary 2:
+
+- 6 full tests
+- 6 Auditory / 18 Reading / 24 Mathematics per test
+- 20 practice concepts
+- 10 questions per practice concept
+- 200 concept-practice questions
+
+Lower Level:
+
+- 6 full tests
+- 34 Verbal / 38 Quantitative / 25 Reading / 30 Mathematics + Essay
+- 5 reading passages per test
+- 5 questions per reading passage
+- progressive difficulty across Tests 1-6
+- difficulty labels hidden from students
+- main UI intended to show all six tests
+
+Assessments:
+
+- section-specific strengths
+- section-specific improvement areas
+- section-specific concept breakdown
+- section-specific recommendations
+
+Architecture:
+
+- static Cloudflare Pages frontend
+- no _worker.js
+- no functions/ folder
+- Supabase for Auth only
+- Cloudflare Worker for API
+- D1 for ReadySetPrep data
+- guest mode retained
+
+
+======================================================================
+19. COMMON TROUBLESHOOTING
+======================================================================
+
+A. "ReadySetPrep account setup required"
+
+Check supabase-config.js.
+
+It must contain the real:
+
+- Supabase Project URL
+- Supabase publishable key
+
+Do not overwrite the working file with placeholders.
+
+
+B. "Failed to fetch"
+
+Check:
+
+1. https://api.readysetprep.ai/health
+2. Worker deployment status
+3. ALLOWED_ORIGINS
+4. browser console/network errors
+5. correct apiBaseUrl in supabase-config.js
+6. Supabase authentication configuration
+
+A second laptop using the same account is not, by itself, a reason for a
+Failed to fetch error.
+
+
+C. Tests 3-6 missing from the Lower Level main Practice UI
+
+Confirm practice.html contains links/buttons for Tests 1-6.
+
+lower-tests.html may contain all six test datasets while an older
+practice.html still displays only Test 1 and Test 2.
+
+
+D. GitHub changed but website still looks old
+
+Check:
+
+- latest Cloudflare Pages deployment completed successfully
+- production branch is correct
+- browser cache is cleared / hard refresh is performed
+
+
+======================================================================
+20. MAINTENANCE RULES
+======================================================================
+
+When making future changes:
+
+1. Modify only the necessary frontend file whenever possible.
+2. Preserve the real supabase-config.js values.
+3. Keep backend Worker code separate from the frontend Pages repository.
+4. Keep all test content original.
+5. Run JavaScript syntax validation after changes.
+6. Recheck all test counts after modifying test banks.
+7. Confirm all six Lower Level test buttons remain visible in practice.html.
+8. Confirm all six Primary 2 tests remain visible.
+9. Confirm assessment interpretation remains section-specific.
+10. Update this single project-notes file instead of creating additional
+    maintenance .txt files.
+
+
+======================================================================
+21. DOCUMENTATION POLICY
+======================================================================
+
+This file replaces the previous separate documentation files:
+
+- README.txt
+- ACCOUNT_AND_D1_SETUP.txt
+- DEPLOY_FRONTEND.txt
+- PRIMARY_TEST_MANIFEST.txt
+- LOWER_TEST_MANIFEST.txt
+- QUALITY_CHECK.txt
+- LATEST_PACKAGE_NOTES.txt
+
+Those files can be removed from the GitHub repository once this file is
+added.
+
+Future setup notes, validation results, deployment instructions, manifests,
+and release notes should be added as new sections in this file rather than
+creating more .txt files.
