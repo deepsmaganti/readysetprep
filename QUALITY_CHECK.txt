@@ -513,3 +513,11 @@ CLOUDFLARE D1 ARCHITECTURE VALIDATION
 - Primary 2 concept practice remains 151 questions
 - Frontend JavaScript syntax checks: PASSED
 - Separate Worker JavaScript syntax check: PASSED
+
+
+LANDING CTA FIX
+- Signed-in selected student: primary CTA = Continue learning
+- Secondary CTA = Switch student
+- Signed-in with no selected student: primary CTA = Choose student
+- Secondary CTA = Manage students
+- Duplicate Continue learning buttons removed

@@ -6,7 +6,7 @@
 //
 // Never put a Supabase service-role key or Cloudflare API token in this file.
 window.RSP_CONFIG = {
-  supabaseUrl: 'https://nugylalbogculcqcjljx.supabase.co',
-  supabasePublishableKey: 'sb_publishable_NLzvtmkypdKmypcB4k658Q_xHS8p8iA',
+  supabaseUrl: 'YOUR_SUPABASE_URL',
+  supabasePublishableKey: 'YOUR_SUPABASE_PUBLISHABLE_KEY',
   apiBaseUrl: 'https://api.readysetprep.ai'
 };

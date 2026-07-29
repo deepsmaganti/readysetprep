@@ -231,6 +231,22 @@ button,input{font:inherit}.app{min-height:100vh}.topbar{position:sticky;top:0;z-
 .assessment-column ul{margin:0;padding-left:20px}
 .assessment-column li{margin:6px 0;line-height:1.4}
 .assessment-concepts{margin-top:16px}
+.assessment-section-analyses{display:grid;gap:16px;margin-top:18px}
+.assessment-section-analysis{
+  padding:18px;border:1px solid var(--line);border-radius:14px;background:#fff
+}
+.assessment-section-analysis-head{
+  display:flex;justify-content:space-between;gap:14px;align-items:flex-start;margin-bottom:12px
+}
+.assessment-section-analysis-head h3{margin:0 0 3px;font-size:20px}
+.assessment-section-analysis-head p{margin:0;color:var(--muted);font-size:13px}
+.assessment-section-analysis-score{
+  flex:0 0 auto;padding:7px 10px;border-radius:10px;background:#f8fafc;
+  text-align:right;font-size:12px;color:var(--muted);font-weight:700
+}
+.assessment-section-analysis-score b{display:block;color:var(--text);font-size:16px;margin-bottom:2px}
+.assessment-section-analysis .assessment-columns{margin:10px 0}
+.assessment-section-analysis .assessment-next-steps{margin-top:12px}
 .assessment-concept{
   display:grid;grid-template-columns:minmax(160px,1fr) 92px 70px;gap:10px;
   align-items:center;padding:9px 0;border-bottom:1px solid var(--line)
@@ -267,6 +283,8 @@ button,input{font:inherit}.app{min-height:100vh}.topbar{position:sticky;top:0;z-
   .assessment-concept{grid-template-columns:1fr 70px}
   .assessment-bar{display:none}
   .assessment-history-header,.assessment-card-head{flex-direction:column}
+  .assessment-section-analysis-head{flex-direction:column}
+  .assessment-section-analysis-score{text-align:left}
 }
 @media print{
   .assessment-history .btn,.assessment-card-actions,.home-floating{display:none!important}
@@ -1366,36 +1384,69 @@ function filteredPrimaryAssessments(history){
  });
 }
 
-function assessmentConceptRows(record){
- return record.concepts.map(x=>`<div class="assessment-concept">
-  <div class="assessment-concept-name"><b>${escapeHtml(x.name)}</b><span>${escapeHtml(x.section)} · ${x.status}</span></div>
+function assessmentConceptRowsFor(concepts){
+ return concepts.map(x=>`<div class="assessment-concept">
+  <div class="assessment-concept-name"><b>${escapeHtml(x.name)}</b><span>${x.status}</span></div>
   <div class="assessment-bar"><span style="width:${x.percent}%"></span></div>
   <div class="assessment-concept-score">${x.correct}/${x.total} · ${x.percent}%</div>
  </div>`).join('');
+}
+function primarySectionAnalyses(record){
+ return (record.sections||[]).map(section=>{
+  const concepts=(record.concepts||[])
+   .filter(x=>x.section===section.label)
+   .sort((a,b)=>b.percent-a.percent||b.total-a.total);
+  const strengths=concepts.filter(x=>x.percent>=70).slice(0,3);
+  const improvement=concepts.slice()
+   .sort((a,b)=>a.percent-b.percent||b.total-a.total)
+   .filter(x=>x.percent<85)
+   .slice(0,3);
+  const nextSteps=improvement.map(x=>`Practice ${x.name} and review missed questions in this section.`);
+  if(section.unanswered){
+   nextSteps.push(`Work on pacing and completion: ${section.unanswered} question${section.unanswered===1?' was':'s were'} unanswered in this section.`);
+  }
+  if(!nextSteps.length){
+   nextSteps.push(`Continue mixed ${section.label.toLowerCase()} practice to maintain this section's performance.`);
+  }
+  return {...section,concepts,strengths,improvement,nextSteps};
+ });
+}
+function primarySectionAnalysisHtml(record){
+ return `<div class="assessment-section-analyses">${primarySectionAnalyses(record).map(section=>`
+  <section class="assessment-section-analysis">
+   <div class="assessment-section-analysis-head">
+    <div>
+     <span class="assessment-band ${assessmentBand(section.percent).className}">${escapeHtml(assessmentBand(section.percent).label)}</span>
+     <h3>${escapeHtml(section.label)}</h3>
+     <p>Section-specific assessment</p>
+    </div>
+    <div class="assessment-section-analysis-score"><b>${section.correct}/${section.total} · ${section.percent}%</b>Est. stanine ${section.stanine} · ${section.unanswered} unanswered</div>
+   </div>
+   <div class="assessment-columns">
+    <div class="assessment-column"><h3>Strengths</h3><ul>${section.strengths.map(x=>`<li><b>${escapeHtml(x.name)}</b> — ${x.correct}/${x.total} (${x.percent}%)</li>`).join('')||`<li>No clear strength identified yet in ${escapeHtml(section.label)}. Review more questions to build a stronger pattern.</li>`}</ul></div>
+    <div class="assessment-column"><h3>Improvement areas</h3><ul>${section.improvement.map(x=>`<li><b>${escapeHtml(x.name)}</b> — ${x.correct}/${x.total} (${x.percent}%)</li>`).join('')||`<li>No significant improvement area was identified in ${escapeHtml(section.label)}.</li>`}</ul></div>
+   </div>
+   <details class="assessment-concepts"><summary><b>${escapeHtml(section.label)} concept breakdown</b></summary>${assessmentConceptRowsFor(section.concepts)}</details>
+   <div class="assessment-next-steps"><b>${escapeHtml(section.label)} next steps</b><ul>${section.nextSteps.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div>
+  </section>`).join('')}</div>`;
 }
 function primaryAssessmentHtml(record){
  const sectionRows=record.sections.map(x=>`<tr><td>${escapeHtml(x.label)}</td><td>${x.correct}/${x.total}</td><td>${x.percent}%</td><td>Est. ${x.stanine}</td><td>${x.unanswered}</td><td>${x.flagged||0}</td></tr>`).join('');
  const flagged=record.flagged||0;
  const flaggedDetails=record.sections.filter(x=>(x.flaggedQuestions||[]).length).map(x=>`<li><b>${escapeHtml(x.label)}:</b> ${x.flaggedQuestions.join(', ')}</li>`).join('');
  return `<section class="assessment-report">
-  <span class="assessment-band ${record.band.className}">${escapeHtml(record.band.label)}</span>
   <h2>Practice Assessment</h2>
-  <p>Completed on ${escapeHtml(formatAssessmentDate(record.completedAt))}.</p>
+  <p>Completed on ${escapeHtml(formatAssessmentDate(record.completedAt))}. Strengths and improvement areas are shown separately for each completed section.</p>
   ${primaryAssessmentSetupHtml(record)}
   <div class="assessment-overview">
-   <div class="assessment-metric"><span>Score analyzed</span><b>${record.total}/${record.max}</b></div>
-   <div class="assessment-metric"><span>Accuracy</span><b>${record.overallPercent}%</b></div>
+   <div class="assessment-metric"><span>Total score</span><b>${record.total}/${record.max}</b></div>
+   <div class="assessment-metric"><span>Overall accuracy</span><b>${record.overallPercent}%</b></div>
    <div class="assessment-metric"><span>Unanswered</span><b>${record.unanswered}</b></div>
    <div class="assessment-metric"><span>★ Flagged</span><b>${flagged}</b></div>
   </div>
   <table class="assessment-section-table"><thead><tr><th>Section</th><th>Score</th><th>Accuracy</th><th>Practice stanine</th><th>Unanswered</th><th>★ Flagged</th></tr></thead><tbody>${sectionRows}</tbody></table>
-  <div class="flag-reference"><h3>★ Flagged questions</h3><p>Flags are shown only as a test-taking reference. They do not affect strengths, focus areas, scores, or recommendations.</p>${flaggedDetails?`<ul class="flag-reference-list">${flaggedDetails}</ul>`:'<p style="margin-top:8px">No questions were flagged in this attempt.</p>'}</div>
-  <div class="assessment-columns">
-   <div class="assessment-column"><h3>Strengths</h3><ul>${record.strengths.map(x=>`<li><b>${escapeHtml(x.name)}</b> — ${x.correct}/${x.total} (${x.percent}%)</li>`).join('')||'<li>Complete more questions to identify a stable strength.</li>'}</ul></div>
-   <div class="assessment-column"><h3>Focus areas</h3><ul>${record.focus.map(x=>`<li><b>${escapeHtml(x.name)}</b> — ${x.correct}/${x.total} (${x.percent}%)</li>`).join('')||'<li>No major focus area was identified in this attempt.</li>'}</ul></div>
-  </div>
-  <details class="assessment-concepts"><summary><b>Concept-by-concept breakdown</b></summary>${assessmentConceptRows(record)}</details>
-  <div class="assessment-next-steps"><b>Recommended next steps</b><ul>${record.nextSteps.map(x=>`<li>${escapeHtml(x)}</li>`).join('')}</ul></div>
+  <div class="flag-reference"><h3>★ Flagged questions</h3><p>Flags are shown only as a test-taking reference. They do not affect section strengths, improvement areas, scores, or recommendations.</p>${flaggedDetails?`<ul class="flag-reference-list">${flaggedDetails}</ul>`:'<p style="margin-top:8px">No questions were flagged in this attempt.</p>'}</div>
+  ${primarySectionAnalysisHtml(record)}
   <div class="assessment-disclaimer">This is an unofficial ReadySetPrep practice assessment. It is not an official ISEE score, percentile, admissions prediction, diagnosis, or educational evaluation. Flagged questions are displayed only for reference and are not used in the assessment calculations.</div>
  </section>`;
 }

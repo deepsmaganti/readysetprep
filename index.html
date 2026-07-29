@@ -93,6 +93,43 @@ button{font:inherit}
   margin-top:28px;
 }
 
+.student-profile-btn{
+  min-width:180px;
+  min-height:66px;
+  display:flex;
+  flex-direction:column;
+  align-items:flex-start;
+  justify-content:center;
+  gap:3px;
+  padding:11px 18px;
+  border:1px solid var(--line);
+  border-radius:14px;
+  background:#fff;
+  color:var(--text);
+  text-align:left;
+  cursor:pointer;
+  box-shadow:0 5px 16px rgba(24,34,48,.04);
+}
+.student-profile-btn:hover{
+  border-color:#9fb2d8;
+  background:#fbfcff;
+}
+.student-profile-btn.active{
+  border-color:var(--blue);
+  box-shadow:0 0 0 2px rgba(49,95,186,.10);
+}
+.student-profile-name{
+  font-size:18px;
+  line-height:1.15;
+  font-weight:900;
+}
+.student-profile-level{
+  color:var(--muted);
+  font-size:12px;
+  font-weight:700;
+}
+.student-profile-btn.active .student-profile-level{color:var(--blue)}
+
 .options{
   padding:12px 0 72px;
 }
@@ -224,7 +261,7 @@ button{font:inherit}
     <div class="wrap">
       <h1>Practice. Review. Improve.</h1>
       <p>ReadySetPrep gives students focused practice, clear explanations, and useful next steps. Start as a guest or log in to sync progress across devices.</p>
-      <div class="hero-actions">
+      <div class="hero-actions" id="heroActions">
         <a class="btn btn-primary" href="practice.html" id="heroStart">Get started as Guest</a>
         <a class="btn btn-secondary" href="login.html" id="heroLogin">Log in</a>
       </div>
@@ -275,12 +312,79 @@ button{font:inherit}
 <script src="supabase-config.js"></script>
 <script src="rsp-cloud.js"></script>
 <script>
+const LEVEL_LABELS={
+  primary2:'Primary 2',
+  primary3:'Primary 3',
+  primary4:'Primary 4',
+  lower:'Lower Level',
+  middle:'Middle Level',
+  upper:'Upper Level'
+};
+
+function escapeHomeHtml(value){
+  return String(value??'').replace(/[&<>"']/g,char=>({
+    '&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'
+  }[char]));
+}
+
+function renderGuestHero(){
+  const heroActions=document.getElementById('heroActions');
+  heroActions.innerHTML=`
+    <a class="btn btn-primary" href="practice.html" id="heroStart">Get started as Guest</a>
+    <a class="btn btn-secondary" href="login.html" id="heroLogin">Log in</a>
+  `;
+}
+
+function renderStudentHero(students){
+  const heroActions=document.getElementById('heroActions');
+
+  if(!students.length){
+    heroActions.innerHTML=`
+      <a class="btn btn-primary" href="students.html">+ Add student</a>
+    `;
+    return;
+  }
+
+  const activeId=RSPCloud.activeStudentId();
+  heroActions.innerHTML=students.map(student=>`
+    <button
+      class="student-profile-btn${student.id===activeId?' active':''}"
+      type="button"
+      data-student-id="${escapeHomeHtml(student.id)}"
+    >
+      <span class="student-profile-name">${escapeHomeHtml(student.name)}</span>
+      <span class="student-profile-level">${escapeHomeHtml(LEVEL_LABELS[student.level]||student.level||'Student profile')}</span>
+    </button>
+  `).join('');
+
+  heroActions.querySelectorAll('[data-student-id]').forEach(button=>{
+    button.addEventListener('click',async()=>{
+      const student=students.find(item=>item.id===button.dataset.studentId);
+      if(!student)return;
+
+      const original=button.innerHTML;
+      button.disabled=true;
+      button.innerHTML=`
+        <span class="student-profile-name">${escapeHomeHtml(student.name)}</span>
+        <span class="student-profile-level">Opening profile…</span>
+      `;
+
+      try{
+        await RSPCloud.selectStudent(student);
+        location.href='practice.html';
+      }catch(error){
+        button.disabled=false;
+        button.innerHTML=original;
+        alert(error.message||'Unable to open this student profile.');
+      }
+    });
+  });
+}
+
 async function renderAccount(){
   const signedOut=document.getElementById('signedOut');
   const signedIn=document.getElementById('signedIn');
-  const heroLogin=document.getElementById('heroLogin');
   const headerStart=document.getElementById('headerStart');
-  const heroStart=document.getElementById('heroStart');
   const testPrep=document.getElementById('testPrepLink');
   const skillPractice=document.getElementById('skillPracticeLink');
   const progress=document.getElementById('progressLink');
@@ -290,12 +394,11 @@ async function renderAccount(){
     signedOut.style.display='flex';
     signedIn.style.display='none';
     headerStart.href='practice.html';
-    heroStart.href='practice.html';
     headerStart.textContent='Get started as Guest';
-    heroStart.textContent='Get started as Guest';
     testPrep.href='practice.html';
     skillPractice.href='practice.html';
     progress.href='primary-tests.html?view=history';
+    renderGuestHero();
     return;
   }
 
@@ -304,16 +407,13 @@ async function renderAccount(){
     signedOut.style.display='flex';
     signedIn.style.display='none';
     headerStart.href='practice.html';
-    heroStart.href='practice.html';
     headerStart.textContent='Get started as Guest';
-    heroStart.textContent='Get started as Guest';
     testPrep.href='practice.html';
     skillPractice.href='practice.html';
     progress.href='primary-tests.html?view=history';
-    heroLogin.textContent='Log in';
-    heroLogin.href='login.html';
     footerLogin.textContent='Log in';
     footerLogin.href='login.html';
+    renderGuestHero();
     return;
   }
 
@@ -326,26 +426,28 @@ async function renderAccount(){
     if(profile?.displayName)displayName=profile.displayName;
   }catch(error){}
 
-  const studentName=RSPCloud.activeStudentName();
-  document.getElementById('userName').textContent=studentName?`${displayName} · ${studentName}`:displayName;
+  document.getElementById('userName').textContent=displayName;
 
-  const hasStudent=Boolean(RSPCloud.activeStudentId());
-  const learningUrl=hasStudent?'practice.html':'students.html';
-  headerStart.href=learningUrl;
-  heroStart.href=learningUrl;
-  headerStart.textContent=hasStudent?'Continue learning':'Choose student';
-  heroStart.textContent=hasStudent?'Continue learning':'Choose student';
-  testPrep.href=learningUrl;
-  skillPractice.href=learningUrl;
-  progress.href=hasStudent?RSPCloud.progressUrl():'students.html';
+  let students=[];
+  try{
+    students=await RSPCloud.listStudents();
+  }catch(error){
+    console.warn('Unable to load students on home page:',error);
+  }
 
-  heroLogin.textContent=hasStudent?'Switch student':'Manage students';
-  heroLogin.href='students.html';
+  renderStudentHero(students);
+
+  const activeId=RSPCloud.activeStudentId();
+  const activeStudent=students.find(student=>student.id===activeId);
+  const hasActiveStudent=Boolean(activeStudent);
+
+  testPrep.href=hasActiveStudent?'practice.html':'students.html';
+  skillPractice.href=hasActiveStudent?'practice.html':'students.html';
+  progress.href=hasActiveStudent?RSPCloud.progressUrl():'students.html';
 
   footerLogin.textContent='Account';
   footerLogin.href='students.html';
 }
-
 document.getElementById('logout').addEventListener('click',async()=>{
   await RSPCloud.signOut();
   await renderAccount();
